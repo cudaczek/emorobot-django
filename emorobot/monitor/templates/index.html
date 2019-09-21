@@ -105,6 +105,13 @@ function setChart(){
 {% endblock %}
 </script>
 
+{% block navbar %}
+    <ul class="nav navbar-nav">
+        <li class="active"><a href="{% url 'index' %}">Home</a></li>
+        <li><a href="{% url 'current_stats' %}">Current</a></li>
+    </ul>
+{% endblock navbar %}
+
 {% block content %}
 
 <div class='row'>

@@ -15,6 +15,15 @@
 </head>
 <body>
 
+<nav class="navbar navbar-default">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="{% url 'index' %}">EMO-ROBOT</a>
+        </div>
+        {% block navbar %}{% endblock navbar %}
+    </div>
+</nav>
+
 <div class="container">
     {% block content %}
     {% endblock content %}

@@ -5,11 +5,15 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
-
 User = get_user_model()
+
 
 def index(request):
     return render(request, "index.html", {"happy": 101})
+
+
+def current_stats(request):
+    return render(request, "current_stats.html")
 
 
 def get_data(request, *args, **kwargs):
@@ -18,6 +22,35 @@ def get_data(request, *args, **kwargs):
         "sad": 80,
     }
     return JsonResponse(data)  # http response
+
+
+def get_current_data(request, *args, **kwargs):
+    audio_recognizer = {
+        "female_angry": 1.456557,
+        "female_calm": 3.3254342,
+        "female_fearful": 12.232114,
+        "female_happy": 1.12341e-5,
+        "female_sad": -1.7,
+        "male_angry": 2.43564,
+        "male_calm": 1.234,
+        "male_fearful": 3.5464,
+        "male_happy": 7.23425,
+        "male_sad": 2.1234
+    }
+    video_recognizer = {
+        "angry": 3.1,
+        "disgust": 5.777,
+        "fear": 2.0001,
+        "happy": 0.756,
+        "sad": -1.97,
+        "suprise": 10.56,
+        "neutral": 0.899
+    }
+    return JsonResponse({"audio_recognizer_labels": list(audio_recognizer.keys()),
+                         "audio_recognizer_data": list(audio_recognizer.values()),
+                         "video_recognizer_labels": list(video_recognizer.keys()),
+                         "video_recognizer_data": list(video_recognizer.values()),
+                         })  # http response
 
 
 class ChartData(APIView):

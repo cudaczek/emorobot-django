@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+<script>
+{% block jquery %}
+
+var endpoint = 'api/data/';
+var audio_labels = [];
+var video_labels = [];
+var audio_values = [];
+var video_values = [];
+$.ajax({
+    method: "GET",
+    url: endpoint,
+    success: function(data){
+        audio_labels = data.audio_recognizer_labels;
+        video_labels = data.video_recognizer_labels;
+        audio_values = data.audio_recognizer_data;
+        video_values = data.video_recognizer_data;
+        setChart();
+    },
+    error: function(error_data){
+        console.log("error");
+        console.log(error_data)
+    }
+});
+
+function setChart(){
+    var audioCtx = document.getElementById('audioChart').getContext('2d');
+    var videoCtx = document.getElementById("videoChart");
+    var audioChart = new Chart(audioCtx, {
+        type: 'bar',
+        data: {
+            labels: audio_labels,
+            datasets: [{
+                label: 'nn response',
+                data: audio_values
+            }]
+            },
+            options: {
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero:true
+                        }
+                    }]
+                }
+            }
+    });
+
+
+    var videoChart = new Chart(videoCtx, {
+        type: 'bar',
+        data: {
+            labels: video_labels,
+            datasets: [{
+                label: 'nn response',
+                data: video_values
+            }]
+        },
+        options: {
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: true
+                    }
+                }]
+            }
+        }
+    });
+}
+
+{% endblock %}
+</script>
+
+{% block navbar %}
+    <ul class="nav navbar-nav">
+        <li><a href="{% url 'index' %}">Home</a></li>
+        <li class="active"><a href="{% url 'current_stats' %}">Current</a></li>
+    </ul>
+{% endblock navbar %}
+
+{% block content %}
+
+<div class='row'>
+    <div url-endpoint='{% url "current_data" %}'>
+        <h1>Currently recognized emotion</h1>
+        <div class='col-sm-6'>
+            <canvas id="audioChart" width="400" height="400"></canvas>
+        </div>
+        <div class='col-sm-6'>
+            <canvas id="videoChart" width="400" height="400"></canvas>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
