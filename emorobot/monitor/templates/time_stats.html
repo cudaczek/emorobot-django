@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+
+<script>
+    {% block jquery % }
+
+    var endpoint = 'api/data/';
+    var audio_labels = [];
+    var video_labels = [];
+    $.ajax({
+        method: "GET",
+        url: endpoint,
+        success: function (data) {
+            audio_labels = data.audio_recognizer_labels;
+            video_labels = data.video_recognizer_labels;
+            setChart();
+        },
+        error: function (error_data) {
+            console.log("error");
+            console.log(error_data)
+        }
+    });
+
+    function newDateString(days) {
+        return moment().add(days, 'd').format();
+    }
+
+    function setChart() {
+
+        var config = {
+            type: 'line',
+            data: {
+                yLabels: audio_labels.concat(video_labels),
+                datasets: [{
+                    label: 'Dataset with string point data',
+                    data: [{
+                        x: newDateString(0),
+                        y: "female_happy"
+                    }, {
+                        x: newDateString(2),
+                        y: "male_happy"
+                    }, {
+                        x: newDateString(4),
+                        y: "male_angry"
+                    }, {
+                        x: newDateString(5),
+                        y: "female_angry"
+                    }],
+                }, {
+                    label: 'Dataset with date object point data',
+                    data: [{
+                        x: newDate(0),
+                        y: "sad"
+                    }, {
+                        x: newDate(2),
+                        y: "happy"
+                    }, {
+                        x: newDate(4),
+                        y: "fear"
+                    }, {
+                        x: newDate(5),
+                        y: "fear"
+                    }]
+                }]
+            },
+            options: {
+                responsive: true,
+                title: {
+                    display: true,
+                    text: 'Chart.js Time Point Data'
+                },
+                scales: {
+                    xAxes: [{
+                        type: 'time',
+                        display: true,
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Date'
+                        },
+                        ticks: {
+                            major: {
+                                fontStyle: 'bold',
+                                fontColor: '#FF0000'
+                            }
+                        }
+                    }],
+                    yAxes: [{
+                        type: 'category',
+                        position: 'left',
+                        display: true,
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Request State'
+                        },
+                        ticks: {
+                            reverse: true
+                        }
+                    }]
+                }
+            }
+        };
+        var ctx = document.getElementById('chart1').getContext('2d');
+        var chart1 = new Chart(ctx, config);
+    }
+
+
+    {% endblock %}
+</script>
+
+{% block navbar %}
+<ul class="nav navbar-nav">
+    <li><a href="{% url 'index' %}">Home</a></li>
+    <li><a href="{% url 'current_stats' %}">Current</a></li>
+    <li class="active"><a href="{% url 'preview' %}">Preview</a></li>
+</ul>
+{% endblock navbar %}
+
+{% block content %}
+
+<div class='row'>
+    <div url-endpoint='{% url "preview_data" %}'>
+        <h1>Preview recognized emotion</h1>
+        <div>
+            <canvas id="chart1" width="400" height="200"></canvas>
+        </div>
+    </div>
+</div>
+
+
+{% endblock content %}
