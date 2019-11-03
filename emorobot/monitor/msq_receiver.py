@@ -1,18 +1,20 @@
 import paho.mqtt.client as mqtt
 import threading
+import json
 
 
 class MessageReceiver:
-    def __init__(self, topic, address):
-        self.topic=topic
-        self.address=address
-        self.client = mqtt.Client()
-        self.client.on_connect = lambda client, userdata, flags, rc : self.connect_callback(topic, rc)
-        self.client.on_message = lambda client, userdata, msg : self.message_callback(msg)
-        self.client.connect("broker.hivemq.com", 1883, 60) 
-        threading.Thread(target = lambda : self.client.loop_forever()).start()
-        print("finished constructor")
-        self.message=":(-"
+    def __init__(self):
+        with open('communication.json', 'r') as json_file:
+            config = json.load(json_file)
+            self.update_topic=config["BASE_TOPIC"] + config["UPDATE_TOPIC_SUFFIX"]
+            self.client = mqtt.Client()
+            self.client.on_connect = lambda client, userdata, flags, rc : self.connect_callback(self.update_topic, rc)
+            self.client.on_message = lambda client, userdata, msg : self.message_callback(msg)
+            self.client.connect(config["BROKER_IP_OR_NAME"], int(config["BROKER_PORT"]), 60) 
+            threading.Thread(target = lambda : self.client.loop_forever()).start()
+            print("finished constructor")
+            self.message=":(-"
 
     def connect_callback(self, topic, rc):
         self.client.subscribe(topic)
