@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+
+{% block navbar %}
+    <ul class="nav navbar-nav">
+        <li><a href="{% url 'index' %}">Home</a></li>
+        <li><a href="{% url 'current_stats' %}">Current</a></li>
+        <li><a href="{% url 'preview' %}">Preview</a></li>
+        <li ><a href="{% url 'control_panel' %}">Control Panel</a></li>
+        <li class="active"><a href="{% url 'evaluator' %}">Evaluator</a></li>
+    </ul>
+{% endblock navbar %}
+
+{% block style %}
+<style>
+.collapsible {
+  background-color: #777;
+  color: white;
+  cursor: pointer;
+  padding: 18px;
+  width: 100%;
+  border: none;
+  text-align: left;
+  outline: none;
+  font-size: 15px;
+}
+
+.active, .collapsible:hover {
+  background-color: #555;
+}
+
+.content {
+            padding: 0 18px;
+            background-color: white;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.2s ease-out;
+        }
+
+        .legend {
+            background-color: lightgray;
+        }
+</style>
+{% endblock style %}
+
+{% block script %}
+<script>
+        $(document).ready(
+            function () {
+                $('input:file').change(
+                    function () {
+                        if ($(this).val()) {
+                            $('input:submit').attr('disabled', false);
+                        }
+                    }
+                );
+            });
+        $(function () {
+            $('#upload').submit(function () {
+                $("input[type='submit']", this)
+                    .val("Uploading...")
+                    .attr('disabled', 'disabled');
+                return true;
+            });
+        });
+    </script>
+
+{% endblock script %}
+
+{% block content %}
+    <div class="container">
+
+        <button class="collapsible">▼ File format</button>
+        <div class="content legend">
+            <h4>Keras model:</h4>
+            <p style="padding-left: 30px">
+                .h5
+            </p>
+        </div>
+        <br>
+
+        <div>
+            <form method="post" id="upload" enctype="multipart/form-data">
+                {% csrf_token %}
+                Select a file:
+                <br>
+                <input type="file" name="uploaded_file" class="btn btn-default" style="float: left;">
+                <input type="submit" value="Upload" class="btn btn-default" disabled/>
+            </form>
+            <br>
+
+            {% if error %}
+                <p style="...">
+                <div class="alert alert-danger">
+                    {{ error }}
+                </div>
+                </p>
+            {% endif %}
+
+            {% if loaded_data %}
+
+            {% endif %}
+            <br><br>
+        </div>
+    </div>
+
+     <script>
+        var coll = document.getElementsByClassName("collapsible");
+        var i;
+
+        for (i = 0; i < coll.length; i++) {
+            coll[i].addEventListener("click", function () {
+                this.classList.toggle("active");
+                var content = this.nextElementSibling;
+                if (content.style.maxHeight) {
+                    content.style.maxHeight = null;
+                } else {
+                    content.style.maxHeight = content.scrollHeight + "px";
+                }
+            });
+        }
+    </script>
+{% endblock content %}
+
+
+

@@ -1,20 +1,26 @@
 import datetime
+import os
+import struct
 
 from django.contrib.auth import get_user_model
+from django.core.files.storage import default_storage
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
+from django.utils.datastructures import MultiValueDictKeyError
 from django.views.generic import TemplateView, FormView
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
+from .msq_receiver import MessageReceiver
 from .forms import RecognitionConfigForm, SavingConfigForm
+from .nn_evaluator import NeuralNetEvaluator
 
 User = get_user_model()
 
 
 def index(request):
-    return render(request, "index.html", {"happy": 101})
+    return render(request, "index.html")
 
 
 def preview_stats(request):
@@ -75,16 +81,14 @@ class SavingFormView(FormView):
 
 # Data getters #
 
-def get_data(request, *args, **kwargs):
-    data = {
-        "happy": 100,
-        "sad": 80,
-    }
-    return JsonResponse(data)  # http response
-
 
 def get_current_data(request, *args, **kwargs):
     from django.apps import apps
+    # receiver = apps.get_app_config('monitor').receiver
+    raw_receiver: MessageReceiver = apps.get_app_config('monitor').receiver_raw
+    message = raw_receiver.message
+    received_data = struct.unpack('>' + ('h' * (int(len(message) / 2))), message)
+    audio_buffer = []
     receiver = apps.get_app_config('monitor').receiver
     audio_recognizer = receiver.emotion_data["audio"]
     video_recognizer = receiver.emotion_data["video"]
@@ -114,7 +118,7 @@ def get_preview_data(request, *args, **kwargs):
         "fear": 2.0001,
         "happy": 0.756,
         "sad": -1.97,
-        "suprise": 10.56,
+        "surprise": 10.56,
         "neutral": 0.899
     }
     date = "2019-09-29"
@@ -127,17 +131,3 @@ def get_preview_data(request, *args, **kwargs):
         "audio_recognizer_labels": list(audio_recognizer.keys()),
         "video_recognizer_labels": list(video_recognizer.keys()),
     })  # http response
-
-
-class ChartData(APIView):
-    authentication_classes = []
-    permission_classes = []
-
-    def get(self, request, format=None):
-        qs_count = User.objects.all().count()
-        labels = ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange']
-        data = {
-            "labels": labels,
-            "defaultData": [qs_count, 6, 7, 8, 12, 1]
-        }
-        return Response(data)
