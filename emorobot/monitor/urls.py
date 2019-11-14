@@ -1,5 +1,6 @@
 from django.urls import path
 
+from .views import ControlPanelView, ConfigFormView, SavingFormView
 from . import views
 
 urlpatterns = [
@@ -9,5 +10,8 @@ urlpatterns = [
     path('api/chart/data/', views.ChartData.as_view(), name='chart'),
     path('current/', views.current_stats, name='current_stats'),
     path('preview/', views.preview_stats, name='preview'),
+    path('control/', ControlPanelView.as_view(), name='control_panel'),
+    path('config/submit', ConfigFormView.as_view(), name='config'),
+    path('saving/submit', SavingFormView.as_view(), name='saving'),
     path('', views.index, name='index'),
 ]

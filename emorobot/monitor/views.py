@@ -3,9 +3,12 @@ import datetime
 from django.contrib.auth import get_user_model
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
+from django.views.generic import TemplateView, FormView
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
+
+from .forms import RecognitionConfigForm, SavingConfigForm
 
 User = get_user_model()
 
@@ -21,6 +24,56 @@ def preview_stats(request):
 def current_stats(request):
     return render(request, "current_stats.html")
 
+
+# Control Panel #
+
+class ControlPanelView(TemplateView):
+    template_name = 'control_panel.html'
+
+    def get(self, request, *args, **kwargs):
+        config_form = RecognitionConfigForm(self.request.GET or None)
+        saving_form = SavingConfigForm(self.request.GET or None)
+        context = self.get_context_data(**kwargs)
+        context['config_form'] = config_form
+        context['saving_form'] = saving_form
+        return self.render_to_response(context)
+
+
+class ConfigFormView(FormView):
+    form_class = RecognitionConfigForm
+    template_name = 'control_panel.html'
+    success_url = '/'
+
+    def post(self, request, *args, **kwargs):
+        question_form = self.form_class(request.POST)
+        answer_form = RecognitionConfigForm()
+        if question_form.is_valid():
+            question_form.save()
+            return self.render_to_response(self.get_context_data(sucess=True))
+        else:
+            return self.render_to_response(
+                self.get_context_data(question_form=question_form, answer_form=answer_form)
+            )
+
+
+class SavingFormView(FormView):
+    form_class = SavingConfigForm
+    template_name = 'sample_forms/index.html'
+    success_url = '/'
+
+    def post(self, request, *args, **kwargs):
+        answer_form = self.form_class(request.POST)
+        question_form = SavingConfigForm()
+        if answer_form.is_valid():
+            answer_form.save()
+            return self.render_to_response(self.get_context_data(sucess=True))
+        else:
+            return self.render_to_response(
+                self.get_context_data(answer_form=answer_form, question_form=question_form)
+            )
+
+
+# Data getters #
 
 def get_data(request, *args, **kwargs):
     data = {

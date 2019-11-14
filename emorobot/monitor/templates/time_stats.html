@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 <script>
-    {% block jquery % }
+    {% block jquery %}
 
     var endpoint = 'api/data/';
     var audio_labels = [];
@@ -48,16 +48,16 @@
                 }, {
                     label: 'Dataset with date object point data',
                     data: [{
-                        x: newDate(0),
+                        x: newDateString(0),
                         y: "sad"
                     }, {
-                        x: newDate(2),
+                        x: newDateString(2),
                         y: "happy"
                     }, {
-                        x: newDate(4),
+                        x: newDateString(4),
                         y: "fear"
                     }, {
-                        x: newDate(5),
+                        x: newDateString(5),
                         y: "fear"
                     }]
                 }]
@@ -111,6 +111,7 @@
     <li><a href="{% url 'index' %}">Home</a></li>
     <li><a href="{% url 'current_stats' %}">Current</a></li>
     <li class="active"><a href="{% url 'preview' %}">Preview</a></li>
+    <li><a href="{% url 'control_panel' %}">Control Panel</a></li>
 </ul>
 {% endblock navbar %}
 

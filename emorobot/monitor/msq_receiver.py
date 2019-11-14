@@ -20,7 +20,6 @@ class MessageReceiver:
         self.client.subscribe(topic)
 
     def message_callback(self, msg):
-        print(msg.payload)
         import json
         name = json.loads(msg.payload)["network"]
         self.messages[name] = msg.payload.decode('utf-8')
