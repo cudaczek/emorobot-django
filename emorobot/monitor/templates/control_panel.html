@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block navbar %}
+    <ul class="nav navbar-nav">
+        <li><a href="{% url 'index' %}">Home</a></li>
+        <li><a href="{% url 'current_stats' %}">Current</a></li>
+        <li><a href="{% url 'preview' %}">Preview</a></li>
+        <li class="active"><a href="{% url 'control_panel' %}">Control Panel</a></li>
+    </ul>
+{% endblock navbar %}
+
+{% block content %}
+
+<div class='container-fluid'>
+
+        <h1>App Mode</h1>
+        <form action="{% url 'config' %}" method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ next }}">
+            {{ config_form.as_p }}
+
+            <div class="container">
+                <input type="submit" name="button" value="Start"/>
+                <input type="submit" name="button" value="Stop"/>
+            </div>
+
+        </form>
+        <h1>Saving data</h1>
+        <form action="{% url 'saving' %}" method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ next }}">
+            {{ saving_form.as_p }}
+
+            <div class="container">
+                <input type="submit" name="button" value="Start"/>
+                <input type="submit" name="button" value="Stop"/>
+            </div>
+
+        </form>
+</div>
+
+{% endblock content %}
