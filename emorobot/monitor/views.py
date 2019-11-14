@@ -33,20 +33,24 @@ def get_data(request, *args, **kwargs):
 def get_current_data(request, *args, **kwargs):
     from django.apps import apps
     receiver = apps.get_app_config('monitor').receiver
-    label = receiver.message.split('-')[0]
-    audio_recognizer = {
-        "female_angry": 1.456557,
-        "female_calm": 3.3254342,
-        "female_fearful": 12.232114,
-        "female_happy": 1.12341e-5,
-        "female_sad": -1.7,
-        "male_angry": 2.43564,
-        "male_calm": 1.234,
-        "male_fearful": 3.5464,
-        "male_happy": 7.23425,
-        "male_sad": 2.1234,
-        label : 1.0
-    }
+    # audio_recognizer = {
+    #     "female_angry": 1.456557,
+    #     "female_calm": 3.3254342,
+    #     "female_fearful": 12.232114,
+    #     "female_happy": 1.12341e-5,
+    #     "female_sad": -1.7,
+    #     "male_angry": 2.43564,
+    #     "male_calm": 1.234,
+    #     "male_fearful": 3.5464,
+    #     "male_happy": 7.23425,
+    #     "male_sad": 2.1234,
+    #     label : 1.0
+    # }
+    import json
+    msg = json.loads(receiver.message)
+    import pprint
+    pprint.pprint(msg["emotion-data"])
+    audio_recognizer = msg["emotion-data"]
     video_recognizer = {
         "angry": 3.1,
         "disgust": 5.777,
