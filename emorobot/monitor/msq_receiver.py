@@ -14,12 +14,14 @@ class MessageReceiver:
             self.client.connect(config["BROKER_IP_OR_NAME"], int(config["BROKER_PORT"]), 60) 
             threading.Thread(target = lambda : self.client.loop_forever()).start()
             print("finished constructor")
-            self.message="{\"emotion-data\":{\"a\":1.3}}"
+            self.messages={"audio":"{\"emotion-data\":{\"a\":1.3}}", "video":"{\"emotion-data\":{\"a\":1.3}}"}
 
     def connect_callback(self, topic, rc):
         self.client.subscribe(topic)
 
     def message_callback(self, msg):
         print(msg.payload)
-        self.message = msg.payload.decode('utf-8')
+        import json
+        name = json.loads(msg.payload)["network"]
+        self.messages[name] = msg.payload.decode('utf-8')
 
