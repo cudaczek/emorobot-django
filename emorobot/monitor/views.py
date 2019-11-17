@@ -86,11 +86,8 @@ def get_data(request, *args, **kwargs):
 def get_current_data(request, *args, **kwargs):
     from django.apps import apps
     receiver = apps.get_app_config('monitor').receiver
-    import json
-    msg = json.loads(receiver.messages["audio"])
-    audio_recognizer = msg["emotion-data"]
-    msg = json.loads(receiver.messages["video"])
-    video_recognizer = msg["emotion-data"]
+    audio_recognizer = receiver.emotion_data["audio"]
+    video_recognizer = receiver.emotion_data["video"]
     return JsonResponse({"audio_recognizer_labels": list(audio_recognizer.keys()),
                          "audio_recognizer_data": list(audio_recognizer.values()),
                          "video_recognizer_labels": list(video_recognizer.keys()),
