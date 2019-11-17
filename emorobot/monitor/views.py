@@ -1,12 +1,11 @@
 import datetime
 
 from django.contrib.auth import get_user_model
-from django.http import HttpResponse, JsonResponse
+from django.http import JsonResponse
 from django.shortcuts import render
 from django.views.generic import TemplateView, FormView
-
-from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from .forms import RecognitionConfigForm, SavingConfigForm
 
@@ -58,19 +57,26 @@ class ConfigFormView(FormView):
 
 class SavingFormView(FormView):
     form_class = SavingConfigForm
-    template_name = 'sample_forms/index.html'
+    template_name = 'control_panel.html'
     success_url = '/'
 
     def post(self, request, *args, **kwargs):
-        answer_form = self.form_class(request.POST)
-        question_form = SavingConfigForm()
-        if answer_form.is_valid():
-            answer_form.save()
-            return self.render_to_response(self.get_context_data(sucess=True))
-        else:
-            return self.render_to_response(
-                self.get_context_data(answer_form=answer_form, question_form=question_form)
-            )
+        question_form = self.form_class(request.POST)
+        print(request.POST)
+        file_name = question_form.data["file_name"]
+        print(file_name)
+        from django.apps import apps
+        receiver = apps.get_app_config('monitor').receiver
+        if request.POST["button"] == "Start":
+            receiver.start_saving_pictures(file_name)
+        elif request.POST["button"] == "Stop":
+            receiver.stop_saving_pictures()
+        config_form = RecognitionConfigForm(self.request.GET or None)
+        saving_form = SavingConfigForm(self.request.GET or None, initial={'file_name': file_name})
+        context = self.get_context_data(**kwargs)
+        context['config_form'] = config_form
+        context['saving_form'] = saving_form
+        return render(request, self.template_name, context)
 
 
 # Data getters #
