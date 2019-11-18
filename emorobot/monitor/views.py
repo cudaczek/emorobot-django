@@ -1,20 +1,22 @@
 import datetime
+import os
 
 from django.contrib.auth import get_user_model
+from django.core.files.storage import default_storage
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
+from django.utils.datastructures import MultiValueDictKeyError
 from django.views.generic import TemplateView, FormView
 
-from rest_framework.views import APIView
-from rest_framework.response import Response
-
+from .msq_receiver import MessageReceiver
 from .forms import RecognitionConfigForm, SavingConfigForm
+from .nn_evaluator import NeuralNetEvaluator
 
 User = get_user_model()
 
 
 def index(request):
-    return render(request, "index.html", {"happy": 101})
+    return render(request, "index.html")
 
 
 def preview_stats(request):
@@ -23,6 +25,32 @@ def preview_stats(request):
 
 def current_stats(request):
     return render(request, "current_stats.html")
+
+
+def neural_network_evaluator(request):
+    filename = None
+    context: dict = {}
+    try:
+        if request.method == 'POST' and request.FILES['uploaded_file']:
+            file = request.FILES['uploaded_file']
+            if isinstance(file.name, str):
+                filename = default_storage.save(file.name, file)
+
+                ext = os.path.splitext(file.name)[1]
+                if ext == '.h5':
+                    neural_net = NeuralNetEvaluator(file_name=file.name)
+                    print("neural net loaded")
+                else:
+                    return render(request, "nn_evaluator.html",
+                                  {'error': "Error: Extension not supported"})
+    except MultiValueDictKeyError:
+        context = {'error': "Error: You didn't select a file"}
+    except UnicodeDecodeError:
+        context = {'error': "Error: File contains weird symbols"}
+    finally:
+        if filename:
+            default_storage.delete(filename)
+    return render(request, "nn_evaluator.html")
 
 
 # Control Panel #
@@ -75,13 +103,6 @@ class SavingFormView(FormView):
 
 # Data getters #
 
-def get_data(request, *args, **kwargs):
-    data = {
-        "happy": 100,
-        "sad": 80,
-    }
-    return JsonResponse(data)  # http response
-
 
 def get_current_data(request, *args, **kwargs):
     from django.apps import apps
@@ -114,7 +135,7 @@ def get_preview_data(request, *args, **kwargs):
         "fear": 2.0001,
         "happy": 0.756,
         "sad": -1.97,
-        "suprise": 10.56,
+        "surprise": 10.56,
         "neutral": 0.899
     }
     date = "2019-09-29"
@@ -127,17 +148,3 @@ def get_preview_data(request, *args, **kwargs):
         "audio_recognizer_labels": list(audio_recognizer.keys()),
         "video_recognizer_labels": list(video_recognizer.keys()),
     })  # http response
-
-
-class ChartData(APIView):
-    authentication_classes = []
-    permission_classes = []
-
-    def get(self, request, format=None):
-        qs_count = User.objects.all().count()
-        labels = ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange']
-        data = {
-            "labels": labels,
-            "defaultData": [qs_count, 6, 7, 8, 12, 1]
-        }
-        return Response(data)
