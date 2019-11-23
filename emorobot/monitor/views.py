@@ -1,20 +1,13 @@
 import datetime
-import os
-import struct
 
 from django.contrib.auth import get_user_model
-from django.core.files.storage import default_storage
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
-from django.utils.datastructures import MultiValueDictKeyError
 from django.views.generic import TemplateView, FormView
+from django.apps import apps
 
-from rest_framework.views import APIView
-from rest_framework.response import Response
-
-from .msq_receiver import MessageReceiver
+from .audio_raw_data_predictor import AudioRawDataPredictor
 from .forms import RecognitionConfigForm, SavingConfigForm
-from .nn_evaluator import NeuralNetEvaluator
 
 User = get_user_model()
 
@@ -81,19 +74,31 @@ class SavingFormView(FormView):
 
 # Data getters #
 
-
-def get_current_data(request, *args, **kwargs):
-    from django.apps import apps
-    # receiver = apps.get_app_config('monitor').receiver
-    raw_receiver: MessageReceiver = apps.get_app_config('monitor').receiver_raw
-    message = raw_receiver.message
-    received_data = struct.unpack('>' + ('h' * (int(len(message) / 2))), message)
-    audio_buffer = []
+def get_current_data_from_emotions(request, *args, **kwargs):
     receiver = apps.get_app_config('monitor').receiver
-    audio_recognizer = receiver.emotion_data["audio"]
+    audio_recognizer = receiver.emotion_data["Speech-Emotion-Analyzer"]
+    audio_predictions = audio_recognizer.values()
+    audio_labels = audio_recognizer.keys()
     video_recognizer = receiver.emotion_data["video"]
-    return JsonResponse({"audio_recognizer_labels": list(audio_recognizer.keys()),
-                         "audio_recognizer_data": list(audio_recognizer.values()),
+    return JsonResponse({"audio_name": "Speech-Emotion-Analyzer",
+                         "audio_recognizer_labels": list(audio_labels),
+                         "audio_recognizer_data": list(audio_predictions),
+                         "video_recognizer_labels": list(video_recognizer.keys()),
+                         "video_recognizer_data": list(video_recognizer.values()),
+                         })  # http response
+
+
+def get_current_data_from_raw_data(request, *args, **kwargs):
+    receiver = apps.get_app_config('monitor').receiver
+    audio_raw_data = receiver.raw_data["Speech-Emotion-Analyzer"]
+    audio_predictions, audio_labels = AudioRawDataPredictor("Emotion_Voice_Detection_Model") \
+        .predict(audio_raw_data)
+    audio_predictions = audio_predictions if audio_predictions is not None else [1.0]
+    audio_labels = audio_labels if audio_labels is not None else ["no raw data"]
+    video_recognizer = receiver.emotion_data["video"]
+    return JsonResponse({"audio_name": "Speech-Emotion-Analyzer",
+                         "audio_recognizer_labels": list(audio_labels),
+                         "audio_recognizer_data": list(audio_predictions),
                          "video_recognizer_labels": list(video_recognizer.keys()),
                          "video_recognizer_data": list(video_recognizer.values()),
                          })  # http response

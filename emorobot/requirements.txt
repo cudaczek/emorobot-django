@@ -5,3 +5,4 @@ tensorflow==1.13.1
 pandas
 librosa
 numpy
+keras==2.2.5

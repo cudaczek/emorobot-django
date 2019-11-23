@@ -4,11 +4,11 @@ from .views import ControlPanelView, ConfigFormView, SavingFormView
 from . import views
 
 urlpatterns = [
-    path('current/api/data/', views.get_current_data, name='current_data'),
+    path('current/api/data/android', views.get_current_data_from_emotions, name='current_emotions'),
+    path('current/api/data/django', views.get_current_data_from_raw_data, name='current_raw_data'),
     path('preview/api/data/', views.get_preview_data, name='preview_data'),
     path('current/', views.current_stats, name='current_stats'),
     path('preview/', views.preview_stats, name='preview'),
-    path('evaluate/', views.neural_network_evaluator, name='evaluator'),
     path('control/', ControlPanelView.as_view(), name='control_panel'),
     path('config/submit', ConfigFormView.as_view(), name='config'),
     path('saving/submit', SavingFormView.as_view(), name='saving'),
