@@ -13,7 +13,6 @@ $.ajax({
     url: endpoint,
     success: function(data){
         console.log(data);
-        console.log("BBBBBBBBBBBBBBBB")
         audio_labels = data.audio_recognizer_labels;
         video_labels = data.video_recognizer_labels;
         audio_values = data.audio_recognizer_data;
@@ -80,7 +79,7 @@ function setChart(){
         <li class="active"><a href="{% url 'current_stats' %}">Current</a></li>
         <li><a href="{% url 'preview' %}">Preview</a></li>
         <li><a href="{% url 'control_panel' %}">Control Panel</a></li>
-        <li><a href="{% url 'evaluator' %}">Evaluator</a></li>
+        <li class=><a href="{% url 'evaluator' %}">Evaluator</a></li>
     </ul>
 {% endblock navbar %}
 

@@ -1,20 +1,32 @@
 import tensorflow as tf
+import keras
 import pandas as pd
 import librosa
 import numpy as np
+import json
+
+from keras.models import model_from_json
 
 
 class NeuralNetEvaluator:
 
-    def __init__(self, file_name):
+    def __init__(self, file_name, sample_rate):
         self.file_name = file_name
         self.model = self.load_model()
+        self.sample_rate = sample_rate
 
     def load_model(self):
-        return tf.keras.models.load_model(self.file_name)
+        json_file = open('resources/model.json', 'r')
+        loaded_model_json = json_file.read()
+        json_file.close()
+        loaded_model = model_from_json(loaded_model_json)
+        # load weights into new model
+        loaded_model.load_weights("resources/Emotion_Voice_Detection_Model.h5")
+        print("Loaded model from disk")
+        return loaded_model
 
-    def predict(self, data, sample_rate):
-        self.preprocess(data, sample_rate)
+    def predict(self, data):
+        self.preprocess(data, self.sample_rate)
         return self.model
 
     def preprocess(self, data, sample_rate):

@@ -1,5 +1,7 @@
 import datetime
 import os
+import struct
+import numpy as np
 
 from django.contrib.auth import get_user_model
 from django.core.files.storage import default_storage
@@ -28,28 +30,28 @@ def current_stats(request):
 
 
 def neural_network_evaluator(request):
-    filename = None
-    context: dict = {}
-    try:
-        if request.method == 'POST' and request.FILES['uploaded_file']:
-            file = request.FILES['uploaded_file']
-            if isinstance(file.name, str):
-                filename = default_storage.save(file.name, file)
-
-                ext = os.path.splitext(file.name)[1]
-                if ext == '.h5':
-                    neural_net = NeuralNetEvaluator(file_name=file.name)
-                    print("neural net loaded")
-                else:
-                    return render(request, "nn_evaluator.html",
-                                  {'error': "Error: Extension not supported"})
-    except MultiValueDictKeyError:
-        context = {'error': "Error: You didn't select a file"}
-    except UnicodeDecodeError:
-        context = {'error': "Error: File contains weird symbols"}
-    finally:
-        if filename:
-            default_storage.delete(filename)
+    # filename = None
+    # context: dict = {}
+    # try:
+    #     if request.method == 'POST' and request.FILES['uploaded_file']:
+    #         file = request.FILES['uploaded_file']
+    #         if isinstance(file.name, str):
+    #             filename = default_storage.save(file.name, file)
+    #
+    #             ext = os.path.splitext(file.name)[1]
+    #             if ext == '.h5':
+    #                 neural_net = NeuralNetEvaluator(file_name=file.name)
+    #                 print("neural net loaded")
+    #             else:
+    #                 return render(request, "nn_evaluator.html",
+    #                               {'error': "Error: Extension not supported"})
+    # except MultiValueDictKeyError:
+    #     context = {'error': "Error: You didn't select a file"}
+    # except UnicodeDecodeError:
+    #     context = {'error': "Error: File contains weird symbols"}
+    # finally:
+    #     if filename:
+    #         default_storage.delete(filename)
     return render(request, "nn_evaluator.html")
 
 
@@ -103,11 +105,22 @@ class SavingFormView(FormView):
 
 # Data getters #
 
-
 def get_current_data(request, *args, **kwargs):
     from django.apps import apps
     receiver = apps.get_app_config('monitor').receiver
     audio_recognizer = receiver.emotion_data["audio"]
+    audio_raw_data = receiver.raw_data["audio"]
+    print(audio_raw_data)
+    if audio_raw_data != b'':
+        count = int(len(audio_raw_data) / 2)
+        print(count, "@")
+        integers = struct.unpack("@" + ('h' * count), audio_raw_data)
+        print(integers)
+        filename = "Emotion_Voice_Detection_Model.h5"
+        neural_net = NeuralNetEvaluator(file_name=filename, sample_rate=44100)
+        print(neural_net.predict(np.array(integers)))
+        print()
+
     video_recognizer = receiver.emotion_data["video"]
     return JsonResponse({"audio_recognizer_labels": list(audio_recognizer.keys()),
                          "audio_recognizer_data": list(audio_recognizer.values()),

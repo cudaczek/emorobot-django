@@ -5,15 +5,15 @@
         <li class="active"><a href="{% url 'index' %}">Home</a></li>
         <li><a href="{% url 'current_stats' %}">Current</a></li>
         <li><a href="{% url 'preview' %}">Preview</a></li>
-        <li><a href="{% url 'control_panel' %}">Control Panel</a></li>
-        <li><a href="{% url 'evaluator' %}">Evaluator</a></li>
+        <li><a href="{% url 'control_panel' %}">Control Panel</a>
+        <li class=><a href="{% url 'evaluator' %}">Evaluator</a></li>
     </ul>
 {% endblock navbar %}
 
 {% block content %}
 
 <div class='row'>
-    <div url-endpoint='{% url "data" %}'>
+    <div>
         <h1>Hello World</h1>
         <h2>Nice to see you</h2>
     </div>
