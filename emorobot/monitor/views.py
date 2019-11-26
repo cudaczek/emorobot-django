@@ -62,15 +62,13 @@ class SavingFormView(FormView):
 
     def post(self, request, *args, **kwargs):
         question_form = self.form_class(request.POST)
-        print(request.POST)
         file_name = question_form.data["file_name"]
-        print(file_name)
         from django.apps import apps
-        receiver = apps.get_app_config('monitor').receiver
+        data_saver = apps.get_app_config('monitor').data_saver
         if request.POST["button"] == "Start":
-            receiver.start_saving_pictures(file_name)
+            data_saver.start_saving_data(file_name)
         elif request.POST["button"] == "Stop":
-            receiver.stop_saving_pictures()
+            data_saver.stop_saving_data()
         config_form = RecognitionConfigForm(self.request.GET or None)
         saving_form = SavingConfigForm(self.request.GET or None, initial={'file_name': file_name})
         context = self.get_context_data(**kwargs)

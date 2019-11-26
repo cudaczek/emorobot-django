@@ -1,15 +1,11 @@
-import io
 import json
-import os
 import threading
-from datetime import datetime
 
 import paho.mqtt.client as mqtt
-from PIL import Image
 
 
 class MessageReceiver:
-    def __init__(self):
+    def __init__(self, data_saver):
         with open('communication.json', 'r') as json_file:
             config = json.load(json_file)
             self.update_topic = config["BASE_TOPIC"] + config["UPDATE_TOPIC_SUFFIX"]
@@ -21,8 +17,7 @@ class MessageReceiver:
             print("finished constructor")
             self.emotion_data = {"audio": {"a": 1.0}, "video": {"a": 1.0}}
             self.raw_data = {"audio": b'', "video": b''}
-            self.save_picture = False
-            self.directory_path = None
+        self.data_sever = data_saver
 
     def connect_callback(self, topic, rc):
         self.client.subscribe(topic)
@@ -30,26 +25,11 @@ class MessageReceiver:
     def message_callback(self, msg):
         import json
         message = json.loads(msg.payload)
-        # print(message)
         name = message["network"]
         if "emotion_data" in message:
             self.emotion_data[name] = message["emotion_data"]
+            self.data_sever.save_emotions(name, self.emotion_data[name])
         if "raw_data" in message:
             import base64
             self.raw_data[name] = base64.b64decode(message["raw_data"])
-            if name == "video" and self.save_picture:
-                self.do_save_picture(self.raw_data[name])
-
-    def start_saving_pictures(self, directory_path):
-        print("Start")
-        self.save_picture = True
-        self.directory_path = directory_path
-
-    def stop_saving_pictures(self):
-        self.save_picture = False
-
-    def do_save_picture(self, bytes):
-        image = Image.open(io.BytesIO(bytes))
-        timestamp = datetime.timestamp(datetime.now())
-        file_path = os.path.join(self.directory_path, str(timestamp))
-        image.save(file_path, "PNG")
+            self.data_sever.save_raw_data(name, self.raw_data[name])
