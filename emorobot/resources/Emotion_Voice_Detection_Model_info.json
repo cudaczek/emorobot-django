@@ -1,0 +1,38 @@
+{
+  "names": [
+    "female_angry",
+    "female_calm",
+    "female_fearful",
+    "female_happy",
+    "female_sad",
+    "male_angry",
+    "male_calm",
+    "male_fearful",
+    "male_happy",
+    "male_sad"
+  ],
+  "AUDIO_MODEL_WEIGHTS": "Emotion_Voice_Detection_Model_weights.h5",
+  "AUDIO_MODEL": "Emotion_Voice_Detection_Model_model.json",
+  "SAMPLE_RATE": 44100,
+  "RECORDING_LENGTH": 44100,
+  "INPUT_BUFFER_SIZE": 216,
+  "OUTPUT_BUFFER_SIZE": 10,
+  "GROUPED_EMOTIONS": {
+    "positive": [
+      "female_happy",
+      "male_happy"
+    ],
+    "neutral": [
+      "female_calm",
+      "male_calm",
+      "male_sad",
+      "female_sad"
+    ],
+    "negative": [
+      "female_angry",
+      "female_fearful",
+      "male_angry",
+      "male_fearful"
+    ]
+  }
+}

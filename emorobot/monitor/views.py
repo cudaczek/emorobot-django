@@ -1,18 +1,13 @@
 import datetime
-import os
-import struct
-import numpy as np
 
 from django.contrib.auth import get_user_model
-from django.core.files.storage import default_storage
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
-from django.utils.datastructures import MultiValueDictKeyError
 from django.views.generic import TemplateView, FormView
+from django.apps import apps
 
-from .msq_receiver import MessageReceiver
+from .audio_raw_data_predictor import AudioRawDataPredictor
 from .forms import RecognitionConfigForm, SavingConfigForm
-from .nn_evaluator import NeuralNetEvaluator
 
 User = get_user_model()
 
@@ -106,24 +101,16 @@ class SavingFormView(FormView):
 # Data getters #
 
 def get_current_data(request, *args, **kwargs):
-    from django.apps import apps
     receiver = apps.get_app_config('monitor').receiver
     audio_recognizer = receiver.emotion_data["audio"]
     audio_raw_data = receiver.raw_data["audio"]
-    print(audio_raw_data)
-    if audio_raw_data != b'':
-        count = int(len(audio_raw_data) / 2)
-        print(count, "@")
-        integers = struct.unpack("@" + ('h' * count), audio_raw_data)
-        print(integers)
-        filename = "Emotion_Voice_Detection_Model.h5"
-        neural_net = NeuralNetEvaluator(file_name=filename, sample_rate=44100)
-        print(neural_net.predict(np.array(integers)))
-        print()
-
+    audio_predictions, audio_labels = AudioRawDataPredictor(audio_raw_data)\
+        .predict("Emotion_Voice_Detection_Model")
+    audio_predictions = audio_predictions if audio_predictions is not None else audio_recognizer.values()
+    audio_labels = audio_labels if audio_labels is not None else audio_recognizer.keys()
     video_recognizer = receiver.emotion_data["video"]
-    return JsonResponse({"audio_recognizer_labels": list(audio_recognizer.keys()),
-                         "audio_recognizer_data": list(audio_recognizer.values()),
+    return JsonResponse({"audio_recognizer_labels": list(audio_labels),
+                         "audio_recognizer_data": list(audio_predictions),
                          "video_recognizer_labels": list(video_recognizer.keys()),
                          "video_recognizer_data": list(video_recognizer.values()),
                          })  # http response
