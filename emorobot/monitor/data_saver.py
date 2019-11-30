@@ -2,9 +2,7 @@ import io
 import os
 from datetime import datetime
 
-import numpy
 import pandas as pd
-import scipy.io.wavfile
 from PIL import Image
 
 
@@ -12,12 +10,10 @@ class DataSaver:
     def __init__(self):
         self.save_data = False
         self.directory_path = None
-        self.video_df = []
-        self.json_audio = []
-        self.json_video_iterator = 1
-        self.json_audio_iterator = 1
         self.VIDEO_FILE_NAME = "video_emotion_data.csv"
         self.AUDIO_FILE_NAME = "audio_emotion_data.csv"
+        self.video_df = pd.DataFrame()
+        self.audio_df = pd.DataFrame()
 
     def start_saving_data(self, directory_path):
         print("Start")
@@ -27,21 +23,33 @@ class DataSaver:
     def stop_saving_data(self):
         self.save_data = False
 
-    def save_emotions(self, name, emotions):
+    def save_emotions(self, name, emotions, timestamp):
+        if name == "video":
+            self.save_video_emotions(emotions, timestamp)
+        else:
+            self.save_audio_emotions(emotions, timestamp)
+
+    def save_video_emotions(self, emotions, timestamp):
+        emotions.update({"timestamp": timestamp})
+        self.video_df = self.video_df.append(emotions, ignore_index=True)
         if not self.save_data:
             return
-        df = pd.DataFrame(emotions, index=[0])
-        if name == "video":
-            file_path = os.path.join(self.directory_path, self.VIDEO_FILE_NAME)
-            with open(file_path, 'a') as f:
-                df.to_csv(f, header=f.tell() == 0)
-        elif name == "audio":
-            file_path = os.path.join(self.directory_path, self.AUDIO_FILE_NAME)
-            print(file_path)
-            with open(file_path, 'a') as f:
-                df.to_csv(f, header=f.tell() == 0)
+        self.save_emotions_to_file(emotions, "video")
 
-    def save_raw_data(self, name, bytes):
+    def save_audio_emotions(self, emotions, timestamp):
+        emotions.update({"timestamp": timestamp})
+        self.audio_df = self.audio_df.append(emotions, ignore_index=True)
+        if not self.save_data:
+            return
+        self.save_emotions_to_file(emotions, "audio")
+
+    def save_emotions_to_file(self, emotions, name):
+        df = pd.DataFrame(emotions, index=[0])
+        file_path = os.path.join(self.directory_path, self.AUDIO_FILE_NAME if name == "audio" else self.VIDEO_FILE_NAME)
+        with open(file_path, 'a') as f:
+            df.to_csv(f, header=f.tell() == 0)
+
+    def save_raw_data(self, name, bytes, timestamp):
         if not self.save_data:
             return
         if name == "video":
@@ -56,11 +64,5 @@ class DataSaver:
         image.save(file_path, "PNG")
 
     def save_audio(self, bytes):
-        timestamp = datetime.timestamp(datetime.now())
-        file_path = os.path.join(self.directory_path, str(int(timestamp)))
-        # with open(file_path + '.wav', mode='bx') as f:
-        #     f.write(bytes)
-        print("saving")
-        b = numpy.array(bytes, dtype=numpy.int16)
-        scipy.io.wavfile.write(f"./blabla.wav",
-                               16000, b)
+        # TODO
+        pass

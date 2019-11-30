@@ -28,8 +28,8 @@ class MessageReceiver:
         name = message["network"]
         if "emotion_data" in message:
             self.emotion_data[name] = message["emotion_data"]
-            self.data_sever.save_emotions(name, self.emotion_data[name])
+            self.data_sever.save_emotions(name, self.emotion_data[name], message["timestamp"])
         if "raw_data" in message:
             import base64
             self.raw_data[name] = base64.b64decode(message["raw_data"])
-            self.data_sever.save_raw_data(name, self.raw_data[name])
+            self.data_sever.save_raw_data(name, self.raw_data[name], message["timestamp"])
