@@ -1,5 +1,3 @@
-import datetime
-
 from django.contrib.auth import get_user_model
 from django.http import JsonResponse
 from django.shortcuts import render
@@ -92,44 +90,31 @@ def get_current_data(request, *args, **kwargs):
     receiver = apps.get_app_config('monitor').receiver
     audio_recognizer = receiver.emotion_data["audio"]
     video_recognizer = receiver.emotion_data["video"]
-    return JsonResponse({"audio_recognizer_labels": list(audio_recognizer.keys()),
-                         "audio_recognizer_data": list(audio_recognizer.values()),
-                         "video_recognizer_labels": list(video_recognizer.keys()),
-                         "video_recognizer_data": list(video_recognizer.values()),
+    video_emotions = get_emotions_without_timestamp(video_recognizer)
+    audio_emotions = get_emotions_without_timestamp(audio_recognizer)
+    return JsonResponse({"audio_recognizer_labels": list(audio_emotions.keys()),
+                         "audio_recognizer_data": list(audio_emotions.values()),
+                         "video_recognizer_labels": list(video_emotions.keys()),
+                         "video_recognizer_data": list(video_emotions.values()),
                          })  # http response
 
 
+def get_emotions_without_timestamp(emotion_dict):
+    dict_without_timestamp = {}
+    for k, v in emotion_dict.items():
+        if k != "timestamp":
+            dict_without_timestamp[k] = v
+    return dict_without_timestamp
+
+
 def get_preview_data(request, *args, **kwargs):
-    audio_recognizer = {
-        "female_angry": 1.456557,
-        "female_calm": 3.3254342,
-        "female_fearful": 12.232114,
-        "female_happy": 1.12341e-5,
-        "female_sad": -1.7,
-        "male_angry": 2.43564,
-        "male_calm": 1.234,
-        "male_fearful": 3.5464,
-        "male_happy": 7.23425,
-        "male_sad": 2.1234
-    }
-    video_recognizer = {
-        "angry": 3.1,
-        "disgust": 5.777,
-        "fear": 2.0001,
-        "happy": 0.756,
-        "sad": -1.97,
-        "suprise": 10.56,
-        "neutral": 0.899
-    }
-    date = "2019-09-29"
-    return JsonResponse({"time_stats": [
-        {
-            "t": datetime.datetime.strptime(date, '%Y-%m-%d'),
-            "x": 100
-        }
-    ],
-        "audio_recognizer_labels": list(audio_recognizer.keys()),
-        "video_recognizer_labels": list(video_recognizer.keys()),
+    from django.apps import apps
+    data_saver = apps.get_app_config('monitor').data_saver
+    return JsonResponse({
+        "audio_recognizer_labels": data_saver.get_video_labels(),
+        "video_recognizer_labels": data_saver.get_audio_labels(),
+        "video_data": data_saver.get_video_data(),
+        "audio_data": data_saver.get_audio_data()
     })  # http response
 
 
