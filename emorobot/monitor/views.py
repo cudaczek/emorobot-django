@@ -4,6 +4,7 @@ from django.contrib.auth import get_user_model
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.views.generic import TemplateView, FormView
+from django.apps import apps
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -45,6 +46,9 @@ class ConfigFormView(FormView):
     success_url = '/'
 
     def post(self, request, *args, **kwargs):
+        config_sender = apps.get_app_config('monitor').config_sender
+        # hardcoded for now
+        config_sender.send_config(update_cycle_on=True)
         question_form = self.form_class(request.POST)
         answer_form = RecognitionConfigForm()
         if question_form.is_valid():
@@ -84,7 +88,6 @@ def get_data(request, *args, **kwargs):
 
 
 def get_current_data(request, *args, **kwargs):
-    from django.apps import apps
     receiver = apps.get_app_config('monitor').receiver
     audio_recognizer = receiver.emotion_data["audio"]
     video_recognizer = receiver.emotion_data["video"]
