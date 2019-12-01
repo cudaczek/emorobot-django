@@ -1,6 +1,7 @@
-import paho.mqtt.client as mqtt
-import threading
 import json
+import threading
+
+import paho.mqtt.client as mqtt
 
 
 class MessageReceiver:
@@ -15,8 +16,8 @@ class MessageReceiver:
             self.client.connect(config["BROKER_IP_OR_NAME"], int(config["BROKER_PORT"]), 60)
             threading.Thread(target=lambda: self.client.loop_forever()).start()
             print("finished constructor")
-            self.emotion_data = {"audio": {"a": 1.0}, "video": {"a": 1.0}}
-            self.raw_data = {"audio": b'', "video": b''}
+            self.emotion_data = {"Speech-Emotion-Analyzer": {"a": 1.0}, "video": {"a": 1.0}}
+            self.raw_data = {"Speech-Emotion-Analyzer": b'', "video": b''}
 
     def connect_callback(self, topic, rc):
         self.client.subscribe(topic)
