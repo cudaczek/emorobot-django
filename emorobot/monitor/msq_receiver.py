@@ -18,6 +18,7 @@ class MessageReceiver:
             print("finished constructor")
             self.emotion_data = {"Speech-Emotion-Analyzer": {"a": 1.0}, "video": {"a": 1.0}}
             self.raw_data = {"Speech-Emotion-Analyzer": b'', "video": b''}
+            self.types={}
 
     def connect_callback(self, topic, rc):
         self.client.subscribe(topic)
@@ -27,6 +28,7 @@ class MessageReceiver:
         message = json.loads(msg.payload)
         # print(message)
         name = message["network"]
+        self.types[name]=message["type"]
         if "emotion_data" in message:
             self.emotion_data[name] = message["emotion_data"]
             # print(self.emotion_data[name])
