@@ -1,16 +1,34 @@
-import tensorflow as tf
+import json
+import struct
+
 import keras
-import pandas as pd
 import librosa
 import numpy as np
-import json
-
+import pandas as pd
+import tensorflow as tf
 from keras.models import model_from_json
 
 
-class NeuralNetEvaluator:
+class AudioRawDataPredictor:
+    def __init__(self, filename):
+        self.neural_net = AudioNeuralNetEvaluator(file_name=filename, sample_rate=44100)
+
+    def predict(self, raw_data):
+        audio_predictions = None
+        audio_labels = None
+        if raw_data != b'':
+            count = int(len(raw_data) / 4)
+            floats = struct.unpack(">" + ('f' * count), raw_data)
+            audio_predictions = self.neural_net.predict(np.array(floats))
+            audio_predictions = [pred.item() for pred in audio_predictions[0]]
+            audio_labels = self.neural_net.names
+        return audio_predictions, audio_labels
+
+
+class AudioNeuralNetEvaluator:
 
     def __init__(self, file_name, sample_rate):
+        self.graph = tf.get_default_graph()
         self.file_name = file_name
         self.model = self.load_model()
         self.sample_rate = sample_rate
@@ -33,8 +51,10 @@ class NeuralNetEvaluator:
         return loaded_model
 
     def predict(self, data):
-        twodim = self.preprocess(data, self.sample_rate)
-        return self.model.predict(twodim)
+        with self.graph.as_default():
+            twodim = self.preprocess(data, self.sample_rate)
+            predictions = self.model.predict(twodim)
+        return predictions
 
     def preprocess(self, data, sample_rate):
         sample_rate = np.array(sample_rate)
