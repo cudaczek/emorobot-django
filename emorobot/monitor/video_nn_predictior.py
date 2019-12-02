@@ -25,6 +25,27 @@ class VideoRawDataPredictor:
             video_labels = self.neural_net.names
         return video_predictions, video_labels
 
+    def grouped_predict(self, raw_data):
+        if raw_data != b'':
+            audio_predictions, audio_labels = self.predict(raw_data)
+            return self.group(audio_predictions, audio_labels)
+        else:
+            return None, None
+
+    def group(self, predictions, labels):
+        groups_names = self.neural_net.grouped_emotions.keys()
+        groups = self.neural_net.grouped_emotions
+        grouped_emotions = dict()
+        for group_name in groups_names:
+            grouped_emotions.update({group_name: 0.0})
+        for pred, label in zip(predictions, labels):
+            if label == "no_face":
+                return [1.0], ["no_face"]
+            for group_name in groups_names:
+                if label in groups[group_name]:
+                    grouped_emotions[group_name] += pred
+        return grouped_emotions.values(), grouped_emotions.keys()
+
 
 class VideoNeuralNetEvaluator:
 
@@ -41,6 +62,7 @@ class VideoNeuralNetEvaluator:
             model_infos = json.load(json_file)
             model_path = 'resources/' + model_infos["MODEL_FILE"]
             self.names = model_infos["EMOTIONS"]
+            self.grouped_emotions = model_infos["GROUPED_EMOTIONS"]
         model = load_model(model_path)
         return model
 

@@ -16,6 +16,7 @@
                 url: endpoint,
                 success: function (data) {
                     audio_name = data.audio_name;
+                    video_name = data.video_name;
                     audio_labels = data.audio_recognizer_labels;
                     video_labels = data.video_recognizer_labels;
                     audio_values = data.audio_recognizer_data;
@@ -56,7 +57,7 @@
                 data: {
                     labels: video_labels,
                     datasets: [{
-                        label: 'nn response',
+                        label: video_name + ' response',
                         data: video_values
                     }]
                 },
@@ -124,10 +125,17 @@
             </div>
         </div>
         <div id="gr_android" class="container tab-pane fade"><br>
-            <h3>SITE UNDER CONSTRUCTION</h3>
-            <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium
-                doloremque
-                laudantium, totam rem aperiam.</p>
+            <h1>Grouped currently recognized emotion from emotions data</h1>
+            <div class='row' url-endpoint='{% url "current_gr_emotions" %}'>
+
+                <div class='col-sm-6'>
+                    <canvas id="gr_androidAudioChart" width="400" height="400"></canvas>
+                </div>
+                <div class='col-sm-6'>
+                    <canvas id="gr_androidVideoChart" width="400" height="400"></canvas>
+                </div>
+
+            </div>
         </div>
         <div id="django" class="container tab-pane fade"><br>
             <h1>Currently recognized emotion from raw data</h1>
@@ -143,10 +151,17 @@
             </div>
         </div>
         <div id="gr_django" class="container tab-pane fade"><br>
-            <h3>SITE UNDER CONSTRUCTION</h3>
-            <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium
-                doloremque
-                laudantium, totam rem aperiam.</p>
+            <h1>Grouped currently recognized emotion from raw data</h1>
+            <div class='row' url-endpoint='{% url "current_gr_raw_data" %}'>
+
+                <div class='col-sm-6'>
+                    <canvas id="gr_djangoAudioChart" width="400" height="400"></canvas>
+                </div>
+                <div class='col-sm-6'>
+                    <canvas id="gr_djangoVideoChart" width="400" height="400"></canvas>
+                </div>
+
+            </div>
         </div>
 
     </div>
