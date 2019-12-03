@@ -1,9 +1,10 @@
+import datetime
+
+from django.apps import apps
 from django.contrib.auth import get_user_model
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.views.generic import TemplateView, FormView
-from rest_framework.response import Response
-from rest_framework.views import APIView
 
 from .forms import RecognitionConfigForm, SavingConfigForm
 
@@ -11,7 +12,7 @@ User = get_user_model()
 
 
 def index(request):
-    return render(request, "index.html", {"happy": 101})
+    return render(request, "index.html")
 
 
 def preview_stats(request):
@@ -77,18 +78,9 @@ class SavingFormView(FormView):
 
 # Data getters #
 
-def get_data(request, *args, **kwargs):
-    data = {
-        "happy": 100,
-        "sad": 80,
-    }
-    return JsonResponse(data)  # http response
-
-
-def get_current_data(request, *args, **kwargs):
-    from django.apps import apps
+def get_current_data_from_emotions(request, *args, **kwargs):
     receiver = apps.get_app_config('monitor').receiver
-    audio_recognizer = receiver.emotion_data["audio"]
+    audio_recognizer = receiver.emotion_data["Speech-Emotion-Analyzer"]
     video_recognizer = receiver.emotion_data["video"]
     video_emotions = get_emotions_without_timestamp(video_recognizer)
     audio_emotions = get_emotions_without_timestamp(audio_recognizer)
@@ -96,6 +88,26 @@ def get_current_data(request, *args, **kwargs):
                          "audio_recognizer_data": list(audio_emotions.values()),
                          "video_recognizer_labels": list(video_emotions.keys()),
                          "video_recognizer_data": list(video_emotions.values()),
+                         })  # http response
+
+
+def get_current_data_from_raw_data(request, *args, **kwargs):
+    receiver = apps.get_app_config('monitor').receiver
+    audio_predictor = apps.get_app_config('monitor').audio_predictor
+    video_predictor = apps.get_app_config('monitor').video_predictor
+    audio_raw_data = receiver.raw_data["Speech-Emotion-Analyzer"]
+    audio_predictions, audio_labels = audio_predictor.predict(audio_raw_data)
+    audio_predictions = audio_predictions if audio_predictions is not None else [1.0]
+    audio_labels = audio_labels if audio_labels is not None else ["no raw data"]
+    video_raw_data = receiver.raw_data["video"]
+    video_predictions, video_labels = video_predictor.predict(video_raw_data)
+    video_predictions = [str(p) for p in video_predictions] if video_predictions is not None else [1.0]
+    video_labels = video_labels if video_labels is not None else ["no raw data"]
+    return JsonResponse({"audio_name": "Speech-Emotion-Analyzer",
+                         "audio_recognizer_labels": list(audio_labels),
+                         "audio_recognizer_data": list(audio_predictions),
+                         "video_recognizer_labels": list(video_labels),
+                         "video_recognizer_data": list(video_predictions),
                          })  # http response
 
 
@@ -116,17 +128,3 @@ def get_preview_data(request, *args, **kwargs):
         "video_data": data_saver.get_video_data(),
         "audio_data": data_saver.get_audio_data()
     })  # http response
-
-
-class ChartData(APIView):
-    authentication_classes = []
-    permission_classes = []
-
-    def get(self, request, format=None):
-        qs_count = User.objects.all().count()
-        labels = ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange']
-        data = {
-            "labels": labels,
-            "defaultData": [qs_count, 6, 7, 8, 12, 1]
-        }
-        return Response(data)
