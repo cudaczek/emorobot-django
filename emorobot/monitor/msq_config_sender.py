@@ -28,7 +28,8 @@ class ConfigSender:
                                   start: NetworkType=None,
                                   tick_length: int=None):
         config = {}
-        if update_cycle_on:
+        if update_cycle_on is not None:
             config['UPDATE_CYCLE_ON'] = update_cycle_on
         # add other parameters to json if applicable
+        print(json.dumps(config))
         self.client.publish(self.config_topic, json.dumps(config))

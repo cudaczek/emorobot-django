@@ -47,17 +47,18 @@ class ConfigFormView(FormView):
 
     def post(self, request, *args, **kwargs):
         config_sender = apps.get_app_config('monitor').config_sender
-        # hardcoded for now
-        config_sender.send_config(update_cycle_on=True)
+        config = {}
         question_form = self.form_class(request.POST)
-        answer_form = RecognitionConfigForm()
-        if question_form.is_valid():
-            question_form.save()
-            return self.render_to_response(self.get_context_data(sucess=True))
-        else:
-            return self.render_to_response(
-                self.get_context_data(question_form=question_form, answer_form=answer_form)
-            )
+        if question_form.data['send_updates'] is not None:
+            config['update_cycle_on'] = question_form.data['send_updates']=='on' 
+        config_sender.send_config(**config)
+        config_form = RecognitionConfigForm(self.request.GET or None)
+        saving_form = SavingConfigForm(self.request.GET or None)
+        context = self.get_context_data(**kwargs)
+        context['config_form'] = config_form
+        context['saving_form'] = saving_form
+        return render(request, self.template_name, context)
+        
 
 
 class SavingFormView(FormView):

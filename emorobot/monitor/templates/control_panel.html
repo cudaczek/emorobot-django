@@ -13,15 +13,14 @@
 
 <div class='container-fluid'>
 
-        <h1>App Mode</h1>
+        <h1>Remote settings</h1>
         <form action="{% url 'config' %}" method="POST">
             {% csrf_token %}
             <input type="hidden" name="next" value="{{ next }}">
             {{ config_form.as_p }}
 
             <div class="container">
-                <input type="submit" name="button" value="Start"/>
-                <input type="submit" name="button" value="Stop"/>
+                <input type="submit" name="button" value="Send settings"/>
             </div>
 
         </form>
