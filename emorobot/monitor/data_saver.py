@@ -96,7 +96,7 @@ class DataSaver:
             x = row["timestamp"]
 
             time = datetime.strptime(x, '%Y-%m-%d %H:%M:%S.%f')
-            x = f"{time.year}-{time.month}-{time.day} {time.hour}:{time.minute}:{time.second}"
+            x = f"{time.year}-{time.month}-0{time.day} {time.hour}:{time.minute}:{time.second}"
             biggest_val = 0
             y = None
             for key, value in row.items():
