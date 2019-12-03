@@ -25,7 +25,6 @@ SECRET_KEY = 'aiac6^i$m60aa!7$p7lc_+2t$n3$u8fr=!s&g*jfs!m1!-c_*-'
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -36,7 +35,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'monitor',
+    'monitor.apps.MonitorConfig',
 ]
 
 MIDDLEWARE = [

@@ -6,12 +6,16 @@
         var endpoint = 'api/data/';
         var audio_labels = [];
         var video_labels = [];
+        var video_data = [];
+        var audio_data = [];
         $.ajax({
             method: "GET",
             url: endpoint,
             success: function (data) {
                 audio_labels = data.audio_recognizer_labels;
                 video_labels = data.video_recognizer_labels;
+                video_data = data.video_data;
+                audio_data = data.audio_data;
                 setChart();
             },
             error: function (error_data) {
@@ -31,57 +35,46 @@
                 data: {
                     yLabels: audio_labels.concat(video_labels),
                     datasets: [{
-                        label: 'Dataset with string point data',
-                        data: [{
-                            x: newDateString(0),
-                            y: "female_happy"
-                        }, {
-                            x: newDateString(2),
-                            y: "male_happy"
-                        }, {
-                            x: newDateString(4),
-                            y: "male_angry"
-                        }, {
-                            x: newDateString(5),
-                            y: "female_angry"
-                        }],
+                        label: 'Audio recognition',
+                        data: audio_data,
+                        backgroundColor: false,
+                        fill: false,
                     }, {
-                        label: 'Dataset with date object point data',
-                        data: [{
-                            x: newDateString(0),
-                            y: "sad"
-                        }, {
-                            x: newDateString(2),
-                            y: "happy"
-                        }, {
-                            x: newDateString(4),
-                            y: "fear"
-                        }, {
-                            x: newDateString(5),
-                            y: "fear"
-                        }]
+                        label: 'Video recognition',
+                        data: video_data,
+                        backgroundColor: false,
+                        fill: false,
                     }]
                 },
                 options: {
                     responsive: true,
                     title: {
                         display: true,
-                        text: 'Chart.js Time Point Data'
+                        text: 'Recognized emotions'
                     },
                     scales: {
                         xAxes: [{
                             type: 'time',
-                            display: true,
+                            display: false,
                             scaleLabel: {
-                                display: true,
+                                {#display: true,#}
                                 labelString: 'Date'
                             },
                             ticks: {
-                                major: {
-                                    fontStyle: 'bold',
-                                    fontColor: '#FF0000'
-                                }
-                            }
+                                source: 'data',
+                                maxTicksLimit: 20,
+                                {#autoSkip: true,#}
+                                {#autoSkipPadding: 50#}
+                            },
+                            time: {
+                                unit: 'minute',
+                                unitStepSize: 0.5,
+                                displayFormats: {
+                                    'hour': 'HH:mm'
+                                },
+                            },
+
+
                         }],
                         yAxes: [{
                             type: 'category',
@@ -89,7 +82,7 @@
                             display: true,
                             scaleLabel: {
                                 display: true,
-                                labelString: 'Request State'
+                                labelString: 'Emotion'
                             },
                             ticks: {
                                 reverse: true
