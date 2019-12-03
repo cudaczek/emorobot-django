@@ -3,6 +3,11 @@
 <script>
 
     {% block jquery %}
+
+        $(function () {
+            $('.nav-tabs a:first').tab('show');
+        });
+
         $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
             var target = $(e.target).attr("href").slice(1);
             var endpoint = 'api/data/'.concat(target);
@@ -10,6 +15,8 @@
             var video_labels = [];
             var audio_values = [];
             var video_values = [];
+            var audioChart;
+            var videoChart;
 
             $.ajax({
                 method: "GET",
@@ -17,6 +24,8 @@
                 success: function (data) {
                     audio_name = data.audio_name;
                     video_name = data.video_name;
+                    video_timestamp = data.video_timestamp;
+                    audio_timestamp = data.audio_timestamp;
                     audio_labels = data.audio_recognizer_labels;
                     video_labels = data.video_recognizer_labels;
                     audio_values = data.audio_recognizer_data;
@@ -31,7 +40,13 @@
             function setChart(target) {
             var audioCtx = document.getElementById(target.concat('AudioChart')).getContext('2d');
             var videoCtx = document.getElementById(target.concat("VideoChart"));
-            var audioChart = new Chart(audioCtx, {
+            if (audioChart) {
+                audioChart.destroy();
+            }
+            if (videoChart) {
+                videoChart.destroy();
+            }
+            audioChart = new Chart(audioCtx, {
                 type: 'bar',
                 data: {
                     labels: audio_labels,
@@ -41,6 +56,10 @@
                     }]
                 },
                 options: {
+                    title: {
+                        display: true,
+                        text: audio_timestamp
+                    },
                     scales: {
                         yAxes: [{
                             ticks: {
@@ -52,7 +71,7 @@
             });
 
 
-            var videoChart = new Chart(videoCtx, {
+            videoChart = new Chart(videoCtx, {
                 type: 'bar',
                 data: {
                     labels: video_labels,
@@ -62,6 +81,10 @@
                     }]
                 },
                 options: {
+                    title: {
+                        display: true,
+                        text: video_timestamp
+                    },
                     scales: {
                         yAxes: [{
                             ticks: {
@@ -95,7 +118,7 @@
 
     <!-- Nav tabs -->
     <ul class="nav nav-tabs">
-        <li class="nav-item">
+        <li class="nav-item active">
             <a class="nav-link" data-toggle="tab" href="#android">ROBOT</a>
         </li>
         <li class="nav-item">
@@ -111,7 +134,7 @@
 
     <!-- Tab panes -->
     <div class="tab-content">
-        <div id="android" class="container tab-pane"><br>
+        <div id="android" class="container tab-pane fede"><br>
             <h1>Currently recognized emotion from emotions data</h1>
             <div class='row' url-endpoint='{% url "current_emotions" %}'>
 
