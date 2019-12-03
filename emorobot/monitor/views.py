@@ -122,9 +122,11 @@ def get_emotions_without_timestamp(emotion_dict):
 def get_preview_data(request, *args, **kwargs):
     from django.apps import apps
     data_saver = apps.get_app_config('monitor').data_saver
+    video_data = data_saver.get_video_data()
+    print(video_data)
     return JsonResponse({
         "audio_recognizer_labels": data_saver.get_video_labels(),
         "video_recognizer_labels": data_saver.get_audio_labels(),
-        "video_data": data_saver.get_video_data(),
+        "video_data": video_data,
         "audio_data": data_saver.get_audio_data()
     })  # http response

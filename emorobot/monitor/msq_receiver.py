@@ -18,7 +18,7 @@ class MessageReceiver:
             print("finished constructor")
             self.emotion_data = {"Speech-Emotion-Analyzer": {"a": 1.0}, "video": {"a": 1.0}}
             self.raw_data = {"Speech-Emotion-Analyzer": b'', "video": b''}
-            self.types={}
+            self.types = {}
         self.data_sever = data_saver
 
     def connect_callback(self, topic, rc):
@@ -29,13 +29,13 @@ class MessageReceiver:
         message = json.loads(msg.payload)
         # print(message)
         name = message["network"]
-        self.types[name]=message["type"]
+        self.types[name] = message["type"]
         if "emotion_data" in message:
             self.emotion_data[name] = message["emotion_data"]
-            self.data_sever.save_emotions(name, self.emotion_data[name], message["timestamp"])
+            self.data_sever.save_emotions(self.types[name], self.emotion_data[name], message["timestamp"])
             # print(self.emotion_data[name])
         if "raw_data" in message:
             import base64
             self.raw_data[name] = base64.b64decode(message["raw_data"])
-            self.data_sever.save_raw_data(name, self.raw_data[name], message["timestamp"])
+            self.data_sever.save_raw_data(self.types[name], self.raw_data[name], message["timestamp"])
             # print(self.raw_data[name])

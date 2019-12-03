@@ -24,10 +24,10 @@ class DataSaver:
     def stop_saving_data(self):
         self.save_data = False
 
-    def save_emotions(self, name, emotions, timestamp):
-        if name == "video":
+    def save_emotions(self, type, emotions, timestamp):
+        if type == "video":
             self.save_video_emotions(emotions, timestamp)
-        else:
+        elif type == "audio":
             self.save_audio_emotions(emotions, timestamp)
 
     def save_video_emotions(self, emotions, timestamp):
@@ -48,18 +48,18 @@ class DataSaver:
             return
         self.save_emotions_to_file(emotions, "audio")
 
-    def save_emotions_to_file(self, emotions, name):
+    def save_emotions_to_file(self, emotions, type):
         df = pd.DataFrame(emotions, index=[0])
-        file_path = os.path.join(self.directory_path, self.AUDIO_FILE_NAME if name == "audio" else self.VIDEO_FILE_NAME)
+        file_path = os.path.join(self.directory_path, self.AUDIO_FILE_NAME if type == "audio" else self.VIDEO_FILE_NAME)
         with open(file_path, 'a') as f:
             df.to_csv(f, header=f.tell() == 0)
 
-    def save_raw_data(self, name, bytes, timestamp):
+    def save_raw_data(self, type, bytes, timestamp):
         if not self.save_data:
             return
-        if name == "video":
+        if type == "video":
             self.save_picture(bytes)
-        else:
+        elif type == "audio":
             self.save_audio(bytes)
 
     def save_picture(self, bytes):
@@ -74,12 +74,14 @@ class DataSaver:
 
     def get_video_labels(self):
         column_names = list(self.video_df.columns.values)
-        column_names.remove("timestamp")
+        if "timestamp" in column_names:
+            column_names.remove("timestamp")
         return column_names
 
     def get_audio_labels(self):
         column_names = list(self.audio_df.columns.values)
-        column_names.remove("timestamp")
+        if "timestamp" in column_names:
+            column_names.remove("timestamp")
         return column_names
 
     def get_video_data(self):
@@ -94,7 +96,7 @@ class DataSaver:
             x = row["timestamp"]
 
             time = datetime.strptime(x, '%Y-%m-%d %H:%M:%S.%f')
-            x = f"{time.year}-{time.month}-{time.day}T{time.hour}:{time.minute}:{time.second}+01:00"
+            x = f"{time.year}-{time.month}-{time.day} {time.hour}:{time.minute}:{time.second}"
             biggest_val = 0
             y = None
             for key, value in row.items():
@@ -103,5 +105,6 @@ class DataSaver:
                 if value > biggest_val:
                     biggest_val = value
                     y = key
+            # print(x, y)
             data_list.append({"x": x, "y": y})
         return data_list
