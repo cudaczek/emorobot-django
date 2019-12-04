@@ -24,6 +24,30 @@ class AudioRawDataPredictor:
             audio_labels = self.neural_net.names
         return audio_predictions, audio_labels
 
+    def grouped_predict(self, raw_data):
+        if raw_data != b'':
+            audio_predictions, audio_labels = self.predict(raw_data)
+            return self.group(audio_predictions, audio_labels)
+        else:
+            return None, None
+
+    def group(self, predictions, labels):
+        groups_names = self.neural_net.grouped_emotions.keys()
+        groups = self.neural_net.grouped_emotions
+        grouped_emotions = dict()
+        for group_name in groups_names:
+            grouped_emotions.update({group_name: 0.0})
+        grouped_emotions.update({"other": 0.0})
+        for pred, label in zip(predictions, labels):
+            added = False
+            for group_name in groups_names:
+                if label in groups[group_name]:
+                    grouped_emotions[group_name] += pred
+                    added = True
+            if not added:
+                grouped_emotions["other"] += pred
+        return grouped_emotions.values(), grouped_emotions.keys()
+
 
 class AudioNeuralNetEvaluator:
 
@@ -40,6 +64,10 @@ class AudioNeuralNetEvaluator:
             model_path = model_infos["AUDIO_MODEL"]
             model_weights = model_infos["AUDIO_MODEL_WEIGHTS"]
             self.names = model_infos["names"]
+            if "GROUPED_EMOTIONS" in model_infos.keys():
+                self.grouped_emotions = model_infos["GROUPED_EMOTIONS"]
+            else:
+                self.grouped_emotions = self.load_global_emotions()
         json_file = open('resources/' + model_path, 'r')
         loaded_model_json = json_file.read()
         json_file.close()
@@ -49,6 +77,11 @@ class AudioNeuralNetEvaluator:
         loaded_model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
         print("Loaded model from disk")
         return loaded_model
+
+    def load_global_emotions(self):
+        with open('resources/emotions_dict.json') as json_file:
+            emotions = json.load(json_file)
+        return emotions
 
     def predict(self, data):
         with self.graph.as_default():

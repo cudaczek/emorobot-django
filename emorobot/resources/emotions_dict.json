@@ -1,0 +1,28 @@
+{
+  "positive": [
+      "happy",
+      "female_happy",
+      "male_happy"
+    ],
+    "neutral": [
+      "neutral",
+      "surprise",
+      "female_calm",
+      "male_calm"
+    ],
+    "negative": [
+      "sad",
+      "fear",
+      "angry",
+      "disgust",
+      "female_angry",
+      "female_fearful",
+      "male_angry",
+      "male_fearful",
+      "male_sad",
+      "female_sad"
+    ],
+  "other": [
+
+  ]
+}

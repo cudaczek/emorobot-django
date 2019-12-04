@@ -18,23 +18,5 @@
   "SAMPLE_RATE": 44100,
   "RECORDING_LENGTH": 44100,
   "INPUT_BUFFER_SIZE": 216,
-  "OUTPUT_BUFFER_SIZE": 10,
-  "GROUPED_EMOTIONS": {
-    "positive": [
-      "female_happy",
-      "male_happy"
-    ],
-    "neutral": [
-      "female_calm",
-      "male_calm"
-    ],
-    "negative": [
-      "female_angry",
-      "female_fearful",
-      "male_angry",
-      "male_fearful",
-      "male_sad",
-      "female_sad"
-    ]
-  }
+  "OUTPUT_BUFFER_SIZE": 10
 }

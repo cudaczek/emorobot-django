@@ -19,6 +19,8 @@ class MessageReceiver:
             self.emotion_data = {"Speech-Emotion-Analyzer": {"a": 1.0}, "video": {"a": 1.0}}
             self.raw_data = {"Speech-Emotion-Analyzer": b'', "video": b''}
             self.types = {}
+            self.timestamp_raw = {"Speech-Emotion-Analyzer": "", "video": ""}
+            self.timestamp_emo = {"Speech-Emotion-Analyzer": "", "video": ""}
         self.data_sever = data_saver
 
     def connect_callback(self, topic, rc):
@@ -32,10 +34,12 @@ class MessageReceiver:
         name = message["network"]
         self.types[name] = message["type"]
         if "emotion_data" in message:
+            self.timestamp_emo[name] = message["timestamp"]
             self.emotion_data[name] = message["emotion_data"]
             self.data_sever.save_emotions(self.types[name], self.emotion_data[name], message["timestamp"])
             # print(self.emotion_data[name])
         if "raw_data" in message:
+            self.timestamp_raw[name] = message["timestamp"]
             import base64
             self.raw_data[name] = base64.b64decode(message["raw_data"])
             self.data_sever.save_raw_data(self.types[name], self.raw_data[name], message["timestamp"])
