@@ -5,8 +5,10 @@ import numpy as np
 import tensorflow as tf
 from keras.models import load_model
 
+from .predictor import Predictor
 
-class VideoRawDataPredictor:
+
+class VideoRawDataPredictor(Predictor):
     def __init__(self, filename):
         self.neural_net = VideoNeuralNetEvaluator(file_name=filename)
 
@@ -24,30 +26,6 @@ class VideoRawDataPredictor:
             video_predictions = self.neural_net.predict(image)
             video_labels = self.neural_net.names
         return video_predictions, video_labels
-
-    def grouped_predict(self, raw_data):
-        if raw_data != b'':
-            audio_predictions, audio_labels = self.predict(raw_data)
-            return self.group(audio_predictions, audio_labels)
-        else:
-            return None, None
-
-    def group(self, predictions, labels):
-        groups_names = self.neural_net.grouped_emotions.keys()
-        groups = self.neural_net.grouped_emotions
-        grouped_emotions = dict()
-        for group_name in groups_names:
-            grouped_emotions.update({group_name: 0.0})
-        grouped_emotions.update({"other": 0.0})
-        for pred, label in zip(predictions, labels):
-            added = False
-            for group_name in groups_names:
-                if label in groups[group_name]:
-                    grouped_emotions[group_name] += pred
-                    added = True
-            if not added:
-                grouped_emotions["other"] += pred
-        return grouped_emotions.values(), grouped_emotions.keys()
 
 
 class VideoNeuralNetEvaluator:

@@ -193,16 +193,19 @@ def get_preview_stats_from_emotions(request, *args, **kwargs):
     return json_for_preview_stats(DataType.EMOTIONS)
 
 
-def preview_stats_from_raw_data(request, *args, **kwargs):
-    data_saver = apps.get_app_config('monitor').data_saver
-    try:
-        data_saver.get_video_data(DataType.EMOTIONS_FROM_RAW_DATA),
-    except Exception as e:
-        print(e)
+def get_preview_stats_from_raw_data(request, *args, **kwargs):
     return json_for_preview_stats(DataType.EMOTIONS_FROM_RAW_DATA)
 
 
-def json_for_preview_stats(data_type, ):
+def get_grouped_preview_stats_from_emotions():
+    return None
+
+
+def get_grouped_preview_stats_from_raw_data():
+    return None
+
+
+def json_for_preview_stats(data_type):
     data_saver = apps.get_app_config('monitor').data_saver
     return JsonResponse({
         "audio_recognizer_labels": data_saver.get_video_labels(data_type),

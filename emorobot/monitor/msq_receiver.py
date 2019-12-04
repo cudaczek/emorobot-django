@@ -37,7 +37,7 @@ class MessageReceiver:
             self.timestamp_emo[name] = message["timestamp"]
             self.emotion_data[name] = message["emotion_data"]
             self.data_sever.save_emotions(self.types[name], self.emotion_data[name], message["timestamp"])
-            # print(self.emotion_data[name])
+            # print(self.emotion_data[name])k
         if "raw_data" in message:
             self.timestamp_raw[name] = message["timestamp"]
             import base64

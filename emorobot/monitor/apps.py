@@ -1,9 +1,8 @@
 from django.apps import AppConfig
 
-from . import audio_predictor
+from .predictors import audio_predictor, video_predictior
 from . import data_saver
 from . import msq_receiver
-from . import video_predictior
 
 
 class MonitorConfig(AppConfig):
