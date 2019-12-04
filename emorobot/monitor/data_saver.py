@@ -30,7 +30,7 @@ class DataSaver:
         self.audio_raw_data_df = pd.DataFrame()
         self.video_grouped_raw_data_df = pd.DataFrame()
         self.audio_grouped_raw_data_df = pd.DataFrame()
-        self.MAX_NUMBER_OF_ROW = 10
+        self.MAX_NUMBER_OF_ROW = 20
 
     def start_saving_data(self, directory_path):
         print("Start")
@@ -52,6 +52,9 @@ class DataSaver:
             self.get_grouped_emotions_with_timestamp(self.video_nn, emotions, timestamp), ignore_index=True)
         if self.video_df.shape[0] > self.MAX_NUMBER_OF_ROW:
             self.video_df = self.video_df.drop(self.video_df.index[0])
+        if self.video_grouped_raw_data_df.shape[0] > self.MAX_NUMBER_OF_ROW:
+            self.video_grouped_raw_data_df = self.video_grouped_raw_data_df.drop(
+                self.video_grouped_raw_data_df.index[0])
         if not self.save_data:
             return
         self.save_emotions_to_file(emotions, "video")
@@ -62,6 +65,8 @@ class DataSaver:
             self.get_grouped_emotions_with_timestamp(self.audio_nn, emotions, timestamp), ignore_index=True)
         if self.audio_df.shape[0] > self.MAX_NUMBER_OF_ROW:
             self.audio_df = self.audio_df.drop(self.audio_df.index[0])
+        if self.audio_grouped_df.shape[0] > self.MAX_NUMBER_OF_ROW:
+            self.audio_grouped_df = self.audio_grouped_df.drop(self.audio_grouped_df.index[0])
         if not self.save_data:
             return
         self.save_emotions_to_file(emotions, "audio")
@@ -163,17 +168,28 @@ class DataSaver:
                     biggest_val = value
                     y = key
             data_list.append({"x": x, "y": y})
+
+        data_list.sort(key=lambda x: x["x"])
         return data_list
 
     def save_emotions_from_raw_data(self, type, bytes, timestamp):
         if type == "video":
             emotions, grouped_emotions = self.predict_emotions(self.video_nn, bytes, timestamp)
             self.video_raw_data_df = self.video_raw_data_df.append(emotions, ignore_index=True)
+            if self.video_raw_data_df.shape[0] > self.MAX_NUMBER_OF_ROW:
+                self.video_raw_data_df = self.video_raw_data_df.drop(self.video_df.index[0])
             self.video_grouped_raw_data_df = self.video_grouped_raw_data_df.append(grouped_emotions, ignore_index=True)
+            if self.video_grouped_raw_data_df.shape[0] > self.MAX_NUMBER_OF_ROW:
+                self.video_grouped_raw_data_df = self.video_grouped_raw_data_df.drop(self.video_df.index[0])
         elif type == "audio":
             emotions, grouped_emotions = self.predict_emotions(self.audio_nn, bytes, timestamp)
             self.audio_raw_data_df = self.audio_raw_data_df.append(emotions, ignore_index=True)
+            if self.audio_raw_data_df.shape[0] > self.MAX_NUMBER_OF_ROW:
+                self.audio_raw_data_df = self.audio_raw_data_df.drop(self.audio_raw_data_df.index[0])
             self.audio_grouped_raw_data_df = self.audio_grouped_raw_data_df.append(grouped_emotions, ignore_index=True)
+            if self.audio_grouped_raw_data_df.shape[0] > self.MAX_NUMBER_OF_ROW:
+                self.audio_grouped_raw_data_df = self.audio_grouped_raw_data_df.drop(
+                    self.audio_grouped_raw_data_df.index[0])
 
     def predict_emotions(self, predictor, bytes, timestamp):
         predictions, labels = predictor.predict(bytes)

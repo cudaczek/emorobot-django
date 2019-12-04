@@ -2,12 +2,18 @@
 
 <script>
     {% block jquery %}
+
+        $(function () {
+            $('.nav-tabs a:first').tab('show');
+        });
+
         $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
             var target = $(e.target).attr("href").slice(1);
             var endpoint = 'api/data/'.concat(target);
             var labels = [];
             var video_data = [];
             var audio_data = [];
+            var chart1;
             $.ajax({
                 method: "GET",
                 url: endpoint,
@@ -38,11 +44,13 @@
                             data: audio_data,
                             backgroundColor: false,
                             fill: false,
+                            borderColor: 'red'
                         }, {
                             label: 'Video recognition',
                             data: video_data,
                             backgroundColor: false,
                             fill: false,
+                            borderColor: 'blue'
                         }]
                     },
                     options: {
@@ -54,25 +62,11 @@
                         scales: {
                             xAxes: [{
                                 type: 'time',
-                                display: false,
+                                display: true,
                                 scaleLabel: {
-                                    {#display: true,#}
+                                    display: true,
                                     labelString: 'Date'
-                                },
-                                ticks: {
-                                    source: 'data',
-                                    maxTicksLimit: 20,
-                                    {#autoSkip: true,#}
-                                    {#autoSkipPadding: 50#}
-                                },
-                                time: {
-                                    unit: 'minute',
-                                    unitStepSize: 0.5,
-                                    displayFormats: {
-                                        'hour': 'HH:mm'
-                                    },
-                                },
-
+                                }
 
                             }],
                             yAxes: [{
@@ -91,7 +85,10 @@
                     }
                 };
                 var ctx = document.getElementById(target.concat('Chart')).getContext('2d');
-                var chart1 = new Chart(ctx, config);
+                if (chart1) {
+                    chart1.destroy();
+                }
+                chart1 = new Chart(ctx, config);
             }
         });
 
@@ -110,14 +107,6 @@
 {% endblock navbar %}
 
 {% block content %}
-
-    {#    <div url-endpoint='{% url "preview_data" %}'>#}
-    {#        <h1>Preview recognized emotion</h1>#}
-    {#        <div>#}
-    {#            <canvas id="chart1" width="400" height="200"></canvas>#}
-    {#        </div>#}
-    {#    </div>#}
-
     <br>
 
     <!-- Nav tabs -->
@@ -141,7 +130,7 @@
     <!-- Tab panes -->
     <div class="tab-content">
         <div id="android" class="container tab-pane"><br>
-            <h1>Currently recognized emotion from emotions data</h1>
+            <h1>Emotions recognized on robot</h1>
             <div url-endpoint='{% url "preview_emotions" %}'>
 
                 <div>
@@ -151,7 +140,7 @@
             </div>
         </div>
         <div id="gr_android" class="container tab-pane fade"><br>
-            <h1>Grouped currently recognized emotion from emotions data</h1>
+            <h1>Grouped emotions recognized on robot</h1>
             <div url-endpoint='{% url "preview_gr_emotions" %}'>
 
                 <div>
@@ -161,6 +150,7 @@
             </div>
         </div>
         <div id="django" class="container tab-pane fade"><br>
+            <h1>Emotions recognized locally</h1>
             <div url-endpoint='{% url "preview_raw_data" %}'>
 
                 <div>
@@ -170,7 +160,7 @@
             </div>
         </div>
         <div id="gr_django" class="container tab-pane fade"><br>
-            <h1>Grouped currently recognized emotion from emotions data</h1>
+            <h1>Grouped emotions recognized locally</h1>
             <div url-endpoint='{% url "preview_gr_raw_data" %}'>
 
                 <div>
