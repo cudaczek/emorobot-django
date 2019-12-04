@@ -25,6 +25,30 @@ class VideoRawDataPredictor:
             video_labels = self.neural_net.names
         return video_predictions, video_labels
 
+    def grouped_predict(self, raw_data):
+        if raw_data != b'':
+            audio_predictions, audio_labels = self.predict(raw_data)
+            return self.group(audio_predictions, audio_labels)
+        else:
+            return None, None
+
+    def group(self, predictions, labels):
+        groups_names = self.neural_net.grouped_emotions.keys()
+        groups = self.neural_net.grouped_emotions
+        grouped_emotions = dict()
+        for group_name in groups_names:
+            grouped_emotions.update({group_name: 0.0})
+        grouped_emotions.update({"other": 0.0})
+        for pred, label in zip(predictions, labels):
+            added = False
+            for group_name in groups_names:
+                if label in groups[group_name]:
+                    grouped_emotions[group_name] += pred
+                    added = True
+            if not added:
+                grouped_emotions["other"] += pred
+        return grouped_emotions.values(), grouped_emotions.keys()
+
 
 class VideoNeuralNetEvaluator:
 
@@ -41,8 +65,17 @@ class VideoNeuralNetEvaluator:
             model_infos = json.load(json_file)
             model_path = 'resources/' + model_infos["MODEL_FILE"]
             self.names = model_infos["EMOTIONS"]
+            if "GROUPED_EMOTIONS" in model_infos.keys():
+                self.grouped_emotions = model_infos["GROUPED_EMOTIONS"]
+            else:
+                self.grouped_emotions = self.load_global_emotions()
         model = load_model(model_path)
         return model
+
+    def load_global_emotions(self):
+        with open('resources/emotions_dict.json') as json_file:
+            emotions = json.load(json_file)
+        return emotions
 
     def load_face_detection_model(self):
         with open('resources/' + self.file_name + '_info.json') as json_file:

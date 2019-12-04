@@ -1,12 +1,11 @@
 {
-
   "EMOTIONS": [
     "angry",
     "disgust",
     "fear",
     "happy",
     "sad",
-    "suprise",
+    "surprise",
     "neutral"
   ],
   "MODEL_FILE" : "Emotion_Video_Detection_Model.hdf5",
@@ -17,7 +16,7 @@
     ],
     "neutral": [
       "neutral",
-      "suprise"
+      "surprise"
     ],
     "negative": [
       "sad",
