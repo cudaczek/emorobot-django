@@ -5,16 +5,14 @@
         $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
             var target = $(e.target).attr("href").slice(1);
             var endpoint = 'api/data/'.concat(target);
-            var audio_labels = [];
-            var video_labels = [];
+            var labels = [];
             var video_data = [];
             var audio_data = [];
             $.ajax({
                 method: "GET",
                 url: endpoint,
                 success: function (data) {
-                    audio_labels = data.audio_recognizer_labels;
-                    video_labels = data.video_recognizer_labels;
+                    labels = data.labels;
                     video_data = data.video_data;
                     audio_data = data.audio_data;
                     setChart();
@@ -34,7 +32,7 @@
                 var config = {
                     type: 'line',
                     data: {
-                        yLabels: audio_labels.concat(video_labels),
+                        yLabels: labels,
                         datasets: [{
                             label: 'Audio recognition',
                             data: audio_data,
@@ -153,10 +151,14 @@
             </div>
         </div>
         <div id="gr_android" class="container tab-pane fade"><br>
-            <h3>SITE UNDER CONSTRUCTION</h3>
-            <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium
-                doloremque
-                laudantium, totam rem aperiam.</p>
+            <h1>Grouped currently recognized emotion from emotions data</h1>
+            <div url-endpoint='{% url "preview_gr_emotions" %}'>
+
+                <div>
+                    <canvas id="gr_androidChart" width="400" height="200"></canvas>
+                </div>
+
+            </div>
         </div>
         <div id="django" class="container tab-pane fade"><br>
             <div url-endpoint='{% url "preview_raw_data" %}'>
@@ -168,10 +170,14 @@
             </div>
         </div>
         <div id="gr_django" class="container tab-pane fade"><br>
-            <h3>SITE UNDER CONSTRUCTION</h3>
-            <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium
-                doloremque
-                laudantium, totam rem aperiam.</p>
+            <h1>Grouped currently recognized emotion from emotions data</h1>
+            <div url-endpoint='{% url "preview_gr_raw_data" %}'>
+
+                <div>
+                    <canvas id="gr_djangoChart" width="400" height="200"></canvas>
+                </div>
+
+            </div>
         </div>
 
     </div>

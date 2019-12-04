@@ -197,19 +197,22 @@ def get_preview_stats_from_raw_data(request, *args, **kwargs):
     return json_for_preview_stats(DataType.EMOTIONS_FROM_RAW_DATA)
 
 
-def get_grouped_preview_stats_from_emotions():
-    return None
+def get_grouped_preview_stats_from_emotions(request, *args, **kwargs):
+    return json_for_preview_stats(DataType.EMOTIONS_GROUPED)
 
 
-def get_grouped_preview_stats_from_raw_data():
-    return None
+def get_grouped_preview_stats_from_raw_data(request, *args, **kwargs):
+    return json_for_preview_stats(DataType.EMOTIONS_FROM_RAW_DATA_GROUPED)
 
 
 def json_for_preview_stats(data_type):
     data_saver = apps.get_app_config('monitor').data_saver
     return JsonResponse({
-        "audio_recognizer_labels": data_saver.get_video_labels(data_type),
-        "video_recognizer_labels": data_saver.get_audio_labels(data_type),
+        "labels": get_unique_labels(data_saver.get_video_labels(data_type), data_saver.get_audio_labels(data_type)),
         "video_data": data_saver.get_video_data(data_type),
         "audio_data": data_saver.get_audio_data(data_type)
     })  # http response
+
+
+def get_unique_labels(video_labels, audio_labels):
+    return list(set(video_labels + audio_labels))
