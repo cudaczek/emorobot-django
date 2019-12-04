@@ -28,6 +28,7 @@ class MessageReceiver:
         import json
         message = json.loads(msg.payload)
         # print(message)
+        # print("got_message")
         name = message["network"]
         self.types[name] = message["type"]
         if "emotion_data" in message:

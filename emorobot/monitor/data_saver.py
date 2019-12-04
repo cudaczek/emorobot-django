@@ -1,19 +1,31 @@
 import io
 import os
 from datetime import datetime
+from enum import Enum
 
 import pandas as pd
 from PIL import Image
 
 
+class DataType(Enum):
+    EMOTIONS = 1
+    EMOTIONS_FROM_RAW_DATA = 2
+    EMOTIONS_GROUPED = 3
+    EMOTIONS_FROM_RAW_DATA_GROUPED = 4
+
+
 class DataSaver:
-    def __init__(self):
+    def __init__(self, video_nn, audio_nn):
         self.save_data = False
         self.directory_path = None
         self.VIDEO_FILE_NAME = "video_emotion_data.csv"
         self.AUDIO_FILE_NAME = "audio_emotion_data.csv"
         self.video_df = pd.DataFrame()
         self.audio_df = pd.DataFrame()
+        self.video_nn = video_nn
+        self.audio_nn = audio_nn
+        self.video_raw_data_df = pd.DataFrame()
+        self.audio_raw_data_df = pd.DataFrame()
         self.MAX_NUMBER_OF_ROW = 300
 
     def start_saving_data(self, directory_path):
@@ -55,6 +67,7 @@ class DataSaver:
             df.to_csv(f, header=f.tell() == 0)
 
     def save_raw_data(self, type, bytes, timestamp):
+        self.save_emotions_from_raw_data(type, bytes, timestamp)
         if not self.save_data:
             return
         if type == "video":
@@ -72,23 +85,35 @@ class DataSaver:
         # TODO
         pass
 
-    def get_video_labels(self):
-        column_names = list(self.video_df.columns.values)
+    def get_video_labels(self, type):
+        if type == DataType.EMOTIONS:
+            return self.get_labels(self.video_df)
+        elif type == DataType.EMOTIONS_FROM_RAW_DATA:
+            return self.get_labels(self.video_raw_data_df)
+
+    def get_audio_labels(self, type):
+        if type == DataType.EMOTIONS:
+            return self.get_labels(self.audio_df)
+        elif type == DataType.EMOTIONS_FROM_RAW_DATA:
+            return self.get_labels(self.audio_raw_data_df)
+
+    def get_labels(self, data_frame):
+        column_names = list(data_frame)
         if "timestamp" in column_names:
             column_names.remove("timestamp")
         return column_names
 
-    def get_audio_labels(self):
-        column_names = list(self.audio_df.columns.values)
-        if "timestamp" in column_names:
-            column_names.remove("timestamp")
-        return column_names
+    def get_video_data(self, type):
+        if type == DataType.EMOTIONS:
+            return self.get_data_from_df(self.video_df)
+        elif type == DataType.EMOTIONS_FROM_RAW_DATA:
+            return self.get_data_from_df(self.video_raw_data_df)
 
-    def get_video_data(self):
-        return self.get_data_from_df(self.video_df)
-
-    def get_audio_data(self):
-        return self.get_data_from_df(self.audio_df)
+    def get_audio_data(self, type):
+        if type == DataType.EMOTIONS:
+            return self.get_data_from_df(self.audio_df)
+        elif type == DataType.EMOTIONS_FROM_RAW_DATA:
+            return self.get_data_from_df(self.audio_raw_data_df)
 
     def get_data_from_df(self, data_frame):
         data_list = []
@@ -108,3 +133,21 @@ class DataSaver:
             # print(x, y)
             data_list.append({"x": x, "y": y})
         return data_list
+
+    def save_emotions_from_raw_data(self, type, bytes, timestamp):
+        if type == "video":
+            predictions, labels = self.video_nn.predict(bytes)
+            emotions = self.get_emotion_dictionary(labels, predictions)
+            emotions["timestamp"] = timestamp
+            self.video_raw_data_df = self.video_raw_data_df.append(emotions, ignore_index=True)
+        elif type == "audio":
+            predictions, labels = self.audio_nn.predict(bytes)
+            emotions = self.get_emotion_dictionary(labels, predictions)
+            emotions["timestamp"] = timestamp
+            self.audio_raw_data_df = self.audio_raw_data_df.append(emotions, ignore_index=True)
+
+    def get_emotion_dictionary(self, labels, predictions):
+        result = {}
+        for l, e in zip(labels, predictions):
+            result[l] = e
+        return result
