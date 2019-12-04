@@ -1,10 +1,14 @@
 import io
 import os
+import struct
 from datetime import datetime
 from enum import Enum
 
+from librosa.output import write_wav
+import numpy as np
 import pandas as pd
 from PIL import Image
+import soundfile as sf
 from dataclasses import dataclass
 
 from .predictors.predictor import Predictor
@@ -94,8 +98,12 @@ class DataSaver:
         image.save(file_path, "PNG")
 
     def save_audio(self, bytes):
-        # TODO
-        pass
+        if bytes != b'':
+            count = int(len(bytes) / 4)
+            floats = struct.unpack(">" + ('f' * count), bytes)
+            timestamp = datetime.timestamp(datetime.now())
+            file_path = os.path.join(self.directory_path, str(int(timestamp)) + ".wav")
+            sf.write(file_path, np.array(floats), 44100, 'PCM_24', endian='LITTLE') # BIG and CPU ENDIAN do not work - FILE or LITTLE ok
 
     def get_video_labels(self, type):
         return self.get_labels(self.video, type)
