@@ -5,7 +5,7 @@ from django.shortcuts import render
 from django.views.generic import TemplateView, FormView
 from django.apps import apps
 
-from emorobot.monitor.current_stats import get_predictions_and_labels
+from .current_stats import get_predictions_and_labels
 from .data_saver import DataType
 from .forms import RecognitionConfigForm, SavingConfigForm
 from .msq_config_sender import UpdateType

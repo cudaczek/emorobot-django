@@ -49,9 +49,9 @@ def group_predictions_and_labels(results, audio_predictor, video_predictor):
     return audio_labels, audio_predictions, video_labels, video_predictions
 
 
-def get_received_emotions_from_robot(audio_recognizer,video_recognizer):
-    audio_predictions, audio_labels = get_emotions_without_timestamp(video_recognizer)
-    video_predictions, video_labels = get_emotions_without_timestamp(audio_recognizer)
+def get_received_emotions_from_robot(audio_recognizer, video_recognizer):
+    audio_predictions, audio_labels = get_emotions_without_timestamp(audio_recognizer)
+    video_predictions, video_labels = get_emotions_without_timestamp(video_recognizer)
     return audio_labels, audio_predictions, video_labels, video_predictions
 
 
@@ -76,7 +76,7 @@ def get_final_predictions(results):
     return audio_labels, audio_predictions, video_labels, video_predictions
 
 
-def get_emotions_without_timestamp(self, emotion_dict):
+def get_emotions_without_timestamp(emotion_dict):
     if "timestamp" in emotion_dict:
         del emotion_dict["at"]
     return emotion_dict.values(), emotion_dict.keys()
