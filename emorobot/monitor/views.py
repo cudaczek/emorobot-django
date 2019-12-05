@@ -5,6 +5,7 @@ from django.shortcuts import render
 from django.views.generic import TemplateView, FormView
 from django.apps import apps
 
+from emorobot.monitor.current_stats import get_predictions_and_labels
 from .data_saver import DataType
 from .forms import RecognitionConfigForm, SavingConfigForm
 from .msq_config_sender import UpdateType
@@ -93,115 +94,68 @@ class SavingFormView(FormView):
 # Data getters #
 
 def get_current_data_from_emotions(request, *args, **kwargs):
-    receiver = apps.get_app_config('monitor').receiver
     audio_name = "Speech-Emotion-Analyzer"
     video_name = "video"
-    audio_recognizer = receiver.emotion_data[audio_name]
-    video_recognizer = receiver.emotion_data[video_name]
-    audio_timestamp = receiver.timestamp_emo[audio_name]
-    video_timestamp = receiver.timestamp_emo[audio_name]
-    video_emotions = get_emotions_without_timestamp(video_recognizer)
-    audio_emotions = get_emotions_without_timestamp(audio_recognizer)
-    audio_predictions = audio_emotions.values()
-    audio_labels = audio_emotions.keys()
+    data_type = DataType.EMOTIONS
+    result = get_predictions_and_labels(audio_name, video_name, data_type)
     return JsonResponse({"audio_name": audio_name,
                          "video_name": video_name,
-                         "audio_timestamp": audio_timestamp,
-                         "video_timestamp": video_timestamp,
-                         "audio_recognizer_labels": list(audio_labels),
-                         "audio_recognizer_data": list(audio_predictions),
-                         "video_recognizer_labels": list(video_emotions.keys()),
-                         "video_recognizer_data": list(video_emotions.values()),
+                         "audio_timestamp": result["audio_timestamp"],
+                         "video_timestamp": result["video_timestamp"],
+                         "audio_recognizer_labels": list(result["audio_labels"]),
+                         "audio_recognizer_data": list(result["audio_predictions"]),
+                         "video_recognizer_labels": list(result["video_labels"]),
+                         "video_recognizer_data": list(result["video_predictions"]),
                          })  # http response
 
 
 def get_grouped_current_data_from_emotions(request, *args, **kwargs):
-    receiver = apps.get_app_config('monitor').receiver
     audio_name = "Speech-Emotion-Analyzer"
     video_name = "video"
-    audio_emotions = get_emotions_without_timestamp(receiver.emotion_data[audio_name])
-    audio_timestamp = receiver.timestamp_emo[audio_name]
-    video_timestamp = receiver.timestamp_emo[video_name]
-    audio_predictor = apps.get_app_config('monitor').audio_predictor
-    video_predictor = apps.get_app_config('monitor').video_predictor
-    audio_predictions, audio_labels = audio_predictor.group(audio_emotions.values(), audio_emotions.keys())
-    video_emotions = get_emotions_without_timestamp(receiver.emotion_data[video_name])
-    video_predictions, video_labels = video_predictor.group(video_emotions.values(), video_emotions.keys())
+    data_type = DataType.EMOTIONS_GROUPED
+    result = get_predictions_and_labels(audio_name, video_name, data_type)
     return JsonResponse({"audio_name": audio_name,
                          "video_name": video_name,
-                         "audio_timestamp": audio_timestamp,
-                         "video_timestamp": video_timestamp,
-                         "audio_recognizer_labels": list(audio_labels),
-                         "audio_recognizer_data": list(audio_predictions),
-                         "video_recognizer_labels": list(video_labels),
-                         "video_recognizer_data": list(video_predictions),
+                         "audio_timestamp": result["audio_timestamp"],
+                         "video_timestamp": result["video_timestamp"],
+                         "audio_recognizer_labels": list(result["audio_labels"]),
+                         "audio_recognizer_data": list(result["audio_predictions"]),
+                         "video_recognizer_labels": list(result["video_labels"]),
+                         "video_recognizer_data": list(result["video_predictions"]),
                          })  # http response
 
 
 def get_current_data_from_raw_data(request, *args, **kwargs):
-    receiver = apps.get_app_config('monitor').receiver
     audio_name = "Speech-Emotion-Analyzer"
     video_name = "video"
-    audio_predictor = apps.get_app_config('monitor').audio_predictor
-    video_predictor = apps.get_app_config('monitor').video_predictor
-    audio_timestamp = receiver.timestamp_raw[audio_name]
-    video_timestamp = receiver.timestamp_raw[video_name]
-    audio_raw_data = receiver.raw_data[audio_name]
-    audio_predictions, audio_labels = audio_predictor.predict(audio_raw_data)
-    video_raw_data = receiver.raw_data[video_name]
-    video_predictions, video_labels = video_predictor.predict(video_raw_data)
-    audio_labels, audio_predictions, video_labels, video_predictions = get_final_predictions(
-        audio_labels, audio_predictions, video_labels, video_predictions)
+    data_type = DataType.EMOTIONS_FROM_RAW_DATA
+    result = get_predictions_and_labels(audio_name, video_name, data_type)
     return JsonResponse({"audio_name": audio_name,
                          "video_name": video_name,
-                         "audio_timestamp": audio_timestamp,
-                         "video_timestamp": video_timestamp,
-                         "audio_recognizer_labels": list(audio_labels),
-                         "audio_recognizer_data": list(audio_predictions),
-                         "video_recognizer_labels": list(video_labels),
-                         "video_recognizer_data": list(video_predictions),
+                         "audio_timestamp": result["audio_timestamp"],
+                         "video_timestamp": result["video_timestamp"],
+                         "audio_recognizer_labels": list(result["audio_labels"]),
+                         "audio_recognizer_data": list(result["audio_predictions"]),
+                         "video_recognizer_labels": list(result["video_labels"]),
+                         "video_recognizer_data": list(result["video_predictions"]),
                          })  # http response
-
-
-def get_final_predictions(audio_labels, audio_predictions, video_labels, video_predictions):
-    audio_predictions = audio_predictions if audio_predictions is not None else [1.0]
-    audio_labels = audio_labels if audio_labels is not None else ["no raw data"]
-    video_predictions = [str(p) for p in video_predictions] if video_predictions is not None else [1.0]
-    video_labels = video_labels if video_labels is not None else ["no raw data"]
-    return audio_labels, audio_predictions, video_labels, video_predictions
 
 
 def get_grouped_current_data_from_raw_data(request, *args, **kwargs):
     receiver = apps.get_app_config('monitor').receiver
     audio_name = "Speech-Emotion-Analyzer"
     video_name = "video"
-    audio_predictor = apps.get_app_config('monitor').audio_predictor
-    video_predictor = apps.get_app_config('monitor').video_predictor
-    audio_timestamp = receiver.timestamp_raw[audio_name]
-    video_timestamp = receiver.timestamp_raw[video_name]
-    audio_raw_data = receiver.raw_data[audio_name]
-    audio_predictions, audio_labels = audio_predictor.grouped_predict(audio_raw_data)
-    video_raw_data = receiver.raw_data[video_name]
-    video_predictions, video_labels = video_predictor.grouped_predict(video_raw_data)
-    audio_labels, audio_predictions, video_labels, video_predictions = get_final_predictions(
-        audio_labels, audio_predictions, video_labels, video_predictions)
+    data_type = DataType.EMOTIONS_FROM_RAW_DATA_GROUPED
+    result = get_predictions_and_labels(audio_name, video_name, data_type)
     return JsonResponse({"audio_name": audio_name,
                          "video_name": video_name,
-                         "audio_timestamp": audio_timestamp,
-                         "video_timestamp": video_timestamp,
-                         "audio_recognizer_labels": list(audio_labels),
-                         "audio_recognizer_data": list(audio_predictions),
-                         "video_recognizer_labels": list(video_labels),
-                         "video_recognizer_data": list(video_predictions),
+                         "audio_timestamp": result["audio_timestamp"],
+                         "video_timestamp": result["video_timestamp"],
+                         "audio_recognizer_labels": list(result["audio_labels"]),
+                         "audio_recognizer_data": list(result["audio_predictions"]),
+                         "video_recognizer_labels": list(result["video_labels"]),
+                         "video_recognizer_data": list(result["video_predictions"]),
                          })  # http response
-
-
-def get_emotions_without_timestamp(emotion_dict):
-    dict_without_timestamp = {}
-    for k, v in emotion_dict.items():
-        if k != "timestamp":
-            dict_without_timestamp[k] = v
-    return dict_without_timestamp
 
 
 def get_preview_stats_from_emotions(request, *args, **kwargs):
@@ -223,7 +177,8 @@ def get_grouped_preview_stats_from_raw_data(request, *args, **kwargs):
 def json_for_preview_stats(data_type):
     data_saver = apps.get_app_config('monitor').data_saver
     return JsonResponse({
-        "labels": get_unique_labels(data_saver.get_video_labels(data_type), data_saver.get_audio_labels(data_type)),
+        "labels": get_unique_labels(data_saver.get_video_labels(data_type),
+                                    data_saver.get_audio_labels(data_type)),
         "video_data": data_saver.get_video_data(data_type),
         "audio_data": data_saver.get_audio_data(data_type)
     })  # http response
