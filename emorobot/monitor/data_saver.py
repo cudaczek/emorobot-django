@@ -18,7 +18,7 @@ class DataType(Enum):
 
 
 @dataclass
-class Data:
+class EmotionData:
     file_name: str
     predictor: Predictor
     data_frame: pd.DataFrame = pd.DataFrame()
@@ -31,8 +31,8 @@ class DataSaver:
     def __init__(self, video_nn, audio_nn):
         self.save_data = False
         self.directory_path = None
-        self.video = Data("video_emotion_data.csv", video_nn)
-        self.audio = Data("audio_emotion_data.csv", audio_nn)
+        self.video = EmotionData("video_emotion_data.csv", video_nn)
+        self.audio = EmotionData("audio_emotion_data.csv", audio_nn)
         self.MAX_NUMBER_OF_ROW = 20
 
     def start_saving_data(self, directory_path):
