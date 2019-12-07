@@ -4,7 +4,6 @@ import struct
 from datetime import datetime
 from enum import Enum
 
-from librosa.output import write_wav
 import numpy as np
 import pandas as pd
 from PIL import Image
@@ -103,7 +102,7 @@ class DataSaver:
             floats = struct.unpack(">" + ('f' * count), bytes)
             timestamp = datetime.timestamp(datetime.now())
             file_path = os.path.join(self.directory_path, str(int(timestamp)) + ".wav")
-            sf.write(file_path, np.array(floats), 44100, 'PCM_24', endian='LITTLE') # BIG and CPU ENDIAN do not work - FILE or LITTLE ok
+            sf.write(file_path, np.array(floats), 44100, 'PCM_16', endian="FILE")
 
     def get_video_labels(self, type):
         return self.get_labels(self.video, type)
@@ -158,7 +157,6 @@ class DataSaver:
                     biggest_val = value
                     y = key
             data_list.append({"x": x, "y": y})
-
         data_list.sort(key=lambda x: x["x"])
         return data_list
 
