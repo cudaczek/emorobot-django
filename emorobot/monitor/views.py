@@ -1,11 +1,10 @@
-import datetime
-
 from django.apps import apps
 from django.contrib.auth import get_user_model
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.views.generic import TemplateView, FormView
 
+from .data_saver import DataType
 from .forms import RecognitionConfigForm, SavingConfigForm
 
 User = get_user_model()
@@ -190,13 +189,30 @@ def get_emotions_without_timestamp(emotion_dict):
     return dict_without_timestamp
 
 
-def get_preview_data(request, *args, **kwargs):
-    from django.apps import apps
+def get_preview_stats_from_emotions(request, *args, **kwargs):
+    return json_for_preview_stats(DataType.EMOTIONS)
+
+
+def get_preview_stats_from_raw_data(request, *args, **kwargs):
+    return json_for_preview_stats(DataType.EMOTIONS_FROM_RAW_DATA)
+
+
+def get_grouped_preview_stats_from_emotions(request, *args, **kwargs):
+    return json_for_preview_stats(DataType.EMOTIONS_GROUPED)
+
+
+def get_grouped_preview_stats_from_raw_data(request, *args, **kwargs):
+    return json_for_preview_stats(DataType.EMOTIONS_FROM_RAW_DATA_GROUPED)
+
+
+def json_for_preview_stats(data_type):
     data_saver = apps.get_app_config('monitor').data_saver
-    video_data = data_saver.get_video_data()
     return JsonResponse({
-        "audio_recognizer_labels": data_saver.get_video_labels(),
-        "video_recognizer_labels": data_saver.get_audio_labels(),
-        "video_data": video_data,
-        "audio_data": data_saver.get_audio_data()
+        "labels": get_unique_labels(data_saver.get_video_labels(data_type), data_saver.get_audio_labels(data_type)),
+        "video_data": data_saver.get_video_data(data_type),
+        "audio_data": data_saver.get_audio_data(data_type)
     })  # http response
+
+
+def get_unique_labels(video_labels, audio_labels):
+    return list(set(video_labels + audio_labels))
