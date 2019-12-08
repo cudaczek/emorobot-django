@@ -27,6 +27,9 @@ class VideoRawDataPredictor(Predictor):
             video_labels = self.neural_net.names
         return video_predictions, video_labels
 
+    def get_name(self):
+        return self.neural_net.name
+
 
 class VideoNeuralNetEvaluator:
 
@@ -41,12 +44,13 @@ class VideoNeuralNetEvaluator:
     def load_model(self):
         with open('resources/' + self.file_name + '_info.json') as json_file:
             model_infos = json.load(json_file)
-            model_path = 'resources/' + model_infos["MODEL_FILE"]
+            model_path = 'resources/' + model_infos["VIDEO_MODEL"]
             self.names = model_infos["EMOTIONS"]
             if "GROUPED_EMOTIONS" in model_infos.keys():
                 self.grouped_emotions = model_infos["GROUPED_EMOTIONS"]
             else:
                 self.grouped_emotions = self.load_global_emotions()
+            self.name = model_infos["NN_NAME"]
         model = load_model(model_path)
         return model
 
