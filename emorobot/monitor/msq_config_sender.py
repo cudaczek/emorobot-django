@@ -8,10 +8,11 @@ class UpdateType(Enum):
     RAW_ONLY = 1
     ALL = 2
 
-class NetworkType(Enum):
-    AUDIO = 0
-    VIDEO = 1
-
+class EnumEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if type(obj) is UpdateType:
+            return str(obj.value)
+        return json.JSONEncoder.default(self, obj)
 
 class ConfigSender:
     def __init__(self):
@@ -24,12 +25,13 @@ class ConfigSender:
     def send_config(self,
                                   update_type: UpdateType=None, 
                                   update_cycle_on: bool=None, 
-                                  stop: NetworkType=None,
-                                  start: NetworkType=None,
                                   tick_length: int=None):
         config = {}
         if update_cycle_on is not None:
             config['UPDATE_CYCLE_ON'] = update_cycle_on
-        # add other parameters to json if applicable
-        print(json.dumps(config))
-        self.client.publish(self.config_topic, json.dumps(config))
+        if update_type is not None:
+            config['UPDATE_TYPE'] = update_type
+        if tick_length is not None:
+            config['TICK_LENGTH'] = tick_length
+        self.client.publish(self.config_topic, json.dumps(config, cls=EnumEncoder))
+        print("sent config message "+ json.dumps(config, cls=EnumEncoder))

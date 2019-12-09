@@ -10,6 +10,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 
 from .forms import RecognitionConfigForm, SavingConfigForm
+from .msq_config_sender import UpdateType
 
 User = get_user_model()
 
@@ -40,6 +41,9 @@ class ControlPanelView(TemplateView):
         return self.render_to_response(context)
 
 
+def is_field_empty(field):
+    return field is None or field == ""
+
 class ConfigFormView(FormView):
     form_class = RecognitionConfigForm
     template_name = 'control_panel.html'
@@ -49,8 +53,14 @@ class ConfigFormView(FormView):
         config_sender = apps.get_app_config('monitor').config_sender
         config = {}
         question_form = self.form_class(request.POST)
-        if question_form.data['send_updates'] is not None:
+        if not is_field_empty(question_form.data['send_updates']):
             config['update_cycle_on'] = question_form.data['send_updates']=='on' 
+        if not is_field_empty(question_form.data['mode']):
+            mode = question_form.data['mode']
+            config['update_type'] = UpdateType.ALL if mode == "full_mode" else (
+                UpdateType.EMOTIONS_ONLY if mode=="results_mode" else UpdateType.RAW_ONLY)
+        if not is_field_empty(question_form.data['frequency']):
+            config['tick_length'] = int(round(float(question_form.data['frequency'])*1000))
         config_sender.send_config(**config)
         config_form = RecognitionConfigForm(self.request.GET or None)
         saving_form = SavingConfigForm(self.request.GET or None)
