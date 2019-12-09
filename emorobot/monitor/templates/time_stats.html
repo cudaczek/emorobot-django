@@ -3,104 +3,94 @@
 <script>
     {% block jquery %}
 
-        var endpoint = 'api/data/';
-        var audio_labels = [];
-        var video_labels = [];
-        $.ajax({
-            method: "GET",
-            url: endpoint,
-            success: function (data) {
-                audio_labels = data.audio_recognizer_labels;
-                video_labels = data.video_recognizer_labels;
-                setChart();
-            },
-            error: function (error_data) {
-                console.log("error");
-                console.log(error_data)
-            }
+        $(function () {
+            $('.nav-tabs a:first').tab('show');
         });
 
-        function newDateString(days) {
-            return moment().add(days, 'd').format();
-        }
-
-        function setChart() {
-
-            var config = {
-                type: 'line',
-                data: {
-                    yLabels: audio_labels.concat(video_labels),
-                    datasets: [{
-                        label: 'Dataset with string point data',
-                        data: [{
-                            x: newDateString(0),
-                            y: "female_happy"
-                        }, {
-                            x: newDateString(2),
-                            y: "male_happy"
-                        }, {
-                            x: newDateString(4),
-                            y: "male_angry"
-                        }, {
-                            x: newDateString(5),
-                            y: "female_angry"
-                        }],
-                    }, {
-                        label: 'Dataset with date object point data',
-                        data: [{
-                            x: newDateString(0),
-                            y: "sad"
-                        }, {
-                            x: newDateString(2),
-                            y: "happy"
-                        }, {
-                            x: newDateString(4),
-                            y: "fear"
-                        }, {
-                            x: newDateString(5),
-                            y: "fear"
-                        }]
-                    }]
+        $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+            var target = $(e.target).attr("href").slice(1);
+            var endpoint = 'api/data/'.concat(target);
+            var labels = [];
+            var video_data = [];
+            var audio_data = [];
+            var chart1;
+            $.ajax({
+                method: "GET",
+                url: endpoint,
+                success: function (data) {
+                    labels = data.labels;
+                    video_data = data.video_data;
+                    audio_data = data.audio_data;
+                    setChart();
                 },
-                options: {
-                    responsive: true,
-                    title: {
-                        display: true,
-                        text: 'Chart.js Time Point Data'
-                    },
-                    scales: {
-                        xAxes: [{
-                            type: 'time',
-                            display: true,
-                            scaleLabel: {
-                                display: true,
-                                labelString: 'Date'
-                            },
-                            ticks: {
-                                major: {
-                                    fontStyle: 'bold',
-                                    fontColor: '#FF0000'
-                                }
-                            }
-                        }],
-                        yAxes: [{
-                            type: 'category',
-                            position: 'left',
-                            display: true,
-                            scaleLabel: {
-                                display: true,
-                                labelString: 'Request State'
-                            },
-                            ticks: {
-                                reverse: true
-                            }
-                        }]
-                    }
+                error: function (error_data) {
+                    console.log("error");
+                    console.log(error_data)
                 }
-            };
-            var ctx = document.getElementById('chart1').getContext('2d');
-            var chart1 = new Chart(ctx, config);
-        }
+            });
+
+            function newDateString(days) {
+                return moment().add(days, 'd').format();
+            }
+
+            function setChart() {
+
+                var config = {
+                    type: 'line',
+                    data: {
+                        yLabels: labels,
+                        datasets: [{
+                            label: 'Audio recognition',
+                            data: audio_data,
+                            backgroundColor: false,
+                            fill: false,
+                            borderColor: 'red'
+                        }, {
+                            label: 'Video recognition',
+                            data: video_data,
+                            backgroundColor: false,
+                            fill: false,
+                            borderColor: 'blue'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        title: {
+                            display: true,
+                            text: 'Recognized emotions'
+                        },
+                        scales: {
+                            xAxes: [{
+                                type: 'time',
+                                display: true,
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: 'Date'
+                                }
+
+                            }],
+                            yAxes: [{
+                                type: 'category',
+                                position: 'left',
+                                display: true,
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: 'Emotion'
+                                },
+                                ticks: {
+                                    reverse: true
+                                }
+                            }]
+                        }
+                    }
+                };
+                var ctx = document.getElementById(target.concat('Chart')).getContext('2d');
+                if (chart1) {
+                    chart1.destroy();
+                }
+                chart1 = new Chart(ctx, config);
+            }
+        });
 
 
     {% endblock %}
@@ -117,13 +107,71 @@
 {% endblock navbar %}
 
 {% block content %}
+    <br>
 
-    <div url-endpoint='{% url "preview_data" %}'>
-        <h1>Preview recognized emotion</h1>
-        <div>
-            <canvas id="chart1" width="400" height="200"></canvas>
+    <!-- Nav tabs -->
+    <ul class="nav nav-tabs">
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#android">ROBOT</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#gr_android">GROUPED ROBOT</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#django">LOCAL</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#gr_django">GROUPED LOCAL</a>
+        </li>
+    </ul>
+
+    <br>
+
+    <!-- Tab panes -->
+    <div class="tab-content">
+        <div id="android" class="container tab-pane"><br>
+            <h1>Emotions recognized on robot</h1>
+            <div url-endpoint='{% url "preview_emotions" %}'>
+
+                <div>
+                    <canvas id="androidChart" width="400" height="200"></canvas>
+                </div>
+
+            </div>
         </div>
+        <div id="gr_android" class="container tab-pane fade"><br>
+            <h1>Grouped emotions recognized on robot</h1>
+            <div url-endpoint='{% url "preview_gr_emotions" %}'>
+
+                <div>
+                    <canvas id="gr_androidChart" width="400" height="200"></canvas>
+                </div>
+
+            </div>
+        </div>
+        <div id="django" class="container tab-pane fade"><br>
+            <h1>Emotions recognized locally</h1>
+            <div url-endpoint='{% url "preview_raw_data" %}'>
+
+                <div>
+                    <canvas id="djangoChart" width="400" height="200"></canvas>
+                </div>
+
+            </div>
+        </div>
+        <div id="gr_django" class="container tab-pane fade"><br>
+            <h1>Grouped emotions recognized locally</h1>
+            <div url-endpoint='{% url "preview_gr_raw_data" %}'>
+
+                <div>
+                    <canvas id="gr_djangoChart" width="400" height="200"></canvas>
+                </div>
+
+            </div>
+        </div>
+
     </div>
+
 
 
 {% endblock content %}

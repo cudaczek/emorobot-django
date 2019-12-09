@@ -1,0 +1,28 @@
+{
+  "EMOTIONS": [
+    "angry",
+    "disgust",
+    "fear",
+    "happy",
+    "sad",
+    "surprise",
+    "neutral"
+  ],
+  "MODEL_FILE" : "Emotion_Video_Detection_Model.hdf5",
+  "FACE_CLASSIFIER" : "haarcascade_frontalface_default.xml",
+  "GROUPED_EMOTIONS": {
+    "positive": [
+      "happy"
+    ],
+    "neutral": [
+      "neutral",
+      "surprise"
+    ],
+    "negative": [
+      "sad",
+      "fear",
+      "angry",
+      "disgust"
+    ]
+  }
+}

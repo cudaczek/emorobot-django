@@ -1,128 +1,193 @@
 {% extends 'base.html' %}
 
 <script>
-{% block jquery %}
 
-var endpoint = 'api/data/';
-var audio_labels = [];
-var video_labels = [];
-var audio_values = [];
-var video_values = [];
-$.ajax({
-    method: "GET",
-    url: endpoint,
-    success: function(data){
-        audio_labels = data.audio_recognizer_labels;
-        video_labels = data.video_recognizer_labels;
-        audio_values = data.audio_recognizer_data;
-        video_values = data.video_recognizer_data;
-        setChart();
-    },
-    error: function(error_data){
-        console.log("error");
-        console.log(error_data)
-    }
-});
+    {% block jquery %}
 
-function setChart(){
-    var audioCtx = document.getElementById('audioChart').getContext('2d');
-    var videoCtx = document.getElementById("videoChart");
-    var audioChart = new Chart(audioCtx, {
-        type: 'bar',
-        data: {
-            labels: audio_labels,
-            datasets: [{
-                label: 'nn response',
-                data: audio_values
-            }]
-            },
-            options: {
-                scales: {
-                    yAxes: [{
-                        ticks: {
-                            beginAtZero:true
-                        }
-                    }]
+        $(function () {
+            $('.nav-tabs a:first').tab('show');
+        });
+
+        $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+            var target = $(e.target).attr("href").slice(1);
+            var endpoint = 'api/data/'.concat(target);
+            var audio_labels = [];
+            var video_labels = [];
+            var audio_values = [];
+            var video_values = [];
+            var audioChart;
+            var videoChart;
+
+            $.ajax({
+                method: "GET",
+                url: endpoint,
+                success: function (data) {
+                    audio_name = data.audio_name;
+                    video_name = data.video_name;
+                    video_timestamp = data.video_timestamp;
+                    audio_timestamp = data.audio_timestamp;
+                    audio_labels = data.audio_recognizer_labels;
+                    video_labels = data.video_recognizer_labels;
+                    audio_values = data.audio_recognizer_data;
+                    video_values = data.video_recognizer_data;
+                    setChart(target);
+                },
+                error: function (error_data) {
+                    console.log("error");
+                    console.log(error_data)
                 }
-            }
-    });
+            });
 
-
-    var videoChart = new Chart(videoCtx, {
-        type: 'bar',
-        data: {
-            labels: video_labels,
-            datasets: [{
-                label: 'nn response',
-                data: video_values
-            }]
-        },
-        options: {
-            scales: {
-                yAxes: [{
-                    ticks: {
-                        beginAtZero: true
+            function setChart(target) {
+                var audioCtx = document.getElementById(target.concat('AudioChart')).getContext('2d');
+                var videoCtx = document.getElementById(target.concat("VideoChart"));
+                if (audioChart) {
+                    audioChart.destroy();
+                }
+                if (videoChart) {
+                    videoChart.destroy();
+                }
+                audioChart = new Chart(audioCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: audio_labels,
+                        datasets: [{
+                            label: audio_name + ' response',
+                            data: audio_values
+                        }]
+                    },
+                    options: {
+                        title: {
+                            display: true,
+                            text: audio_timestamp
+                        },
+                        scales: {
+                            yAxes: [{
+                                ticks: {
+                                    beginAtZero: true
+                                }
+                            }]
+                        }
                     }
-                }]
-            }
-        }
-    });
-}
+                });
 
-$(document).ready(function(){
-      $(".nav-tabs a").click(function(){
-        $(this).tab('show');
-      });
-    });{% endblock %}
+
+                videoChart = new Chart(videoCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: video_labels,
+                        datasets: [{
+                            label: video_name + ' response',
+                            data: video_values
+                        }]
+                    },
+                    options: {
+                        title: {
+                            display: true,
+                            text: video_timestamp
+                        },
+                        scales: {
+                            yAxes: [{
+                                ticks: {
+                                    beginAtZero: true
+                                }
+                            }]
+                        }
+                    }
+                });
+            }
+        });
+
+
+    {% endblock %}
 </script>
 
 {% block navbar %}
     <ul class="navbar-nav">
         <li class="nav-item"><a class="nav-link" href="{% url 'index' %}">Home</a></li>
-        <li class="nav-item active"><a class="nav-link" href="{% url 'current_stats' %}">Current</a></li>
+        <li class="nav-item active"><a class="nav-link" href="{% url 'current_stats' %}">Current</a>
+        </li>
         <li class="nav-item"><a class="nav-link" href="{% url 'preview' %}">Preview</a></li>
-        <li class="nav-item"><a class="nav-link" href="{% url 'control_panel' %}">Control Panel</a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'control_panel' %}">Control Panel</a>
+        </li>
     </ul>
 {% endblock navbar %}
 
 {% block content %}
 
-      <br>
-  <!-- Nav tabs -->
-  <ul class="nav nav-tabs">
-    <li class="nav-item">
-      <a class="nav-link active" href="#android">ANDROID</a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link" href="#django">DJANGO</a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link" href="#synthesis">SYNTHESIZED</a>
-    </li>
-  </ul>
+    <br>
 
-  <!-- Tab panes -->
-  <div class="tab-content">
-    <div id="android" class="container tab-pane active"><br>
-        <h1>Currently recognized emotion</h1>
-      <div class='row' url-endpoint='{% url "current_data" %}'>
+    <!-- Nav tabs -->
+    <ul class="nav nav-tabs">
+        <li class="nav-item active">
+            <a class="nav-link" data-toggle="tab" href="#android">ROBOT</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#gr_android">GROUPED ROBOT</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#django">LOCAL</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#gr_django">GROUPED LOCAL</a>
+        </li>
+    </ul>
 
-            <div class='col-sm-6'>
-                <canvas id="audioChart" width="400" height="400"></canvas>
+    <!-- Tab panes -->
+    <div class="tab-content">
+        <div id="android" class="container tab-pane fede"><br>
+            <h1>Current emotions recognized on robot</h1>
+            <div class='row' url-endpoint='{% url "current_emotions" %}'>
+
+                <div class='col-sm-6'>
+                    <canvas id="androidAudioChart" width="400" height="400"></canvas>
+                </div>
+                <div class='col-sm-6'>
+                    <canvas id="androidVideoChart" width="400" height="400"></canvas>
+                </div>
+
             </div>
-            <div class='col-sm-6'>
-                <canvas id="videoChart" width="400" height="400"></canvas>
-            </div>
+        </div>
+        <div id="gr_android" class="container tab-pane fade"><br>
+            <h1>Current grouped emotions recognized on robot</h1>
+            <div class='row' url-endpoint='{% url "current_gr_emotions" %}'>
 
-      </div>
-    </div>
-    <div id="django" class="container tab-pane fade"><br>
-      <h3>DJANGO</h3>
-      <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
-    </div>
-    <div id="synthesis" class="container tab-pane fade"><br>
-      <h3>SYNTHESIZED</h3>
-      <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam.</p>
+                <div class='col-sm-6'>
+                    <canvas id="gr_androidAudioChart" width="400" height="400"></canvas>
+                </div>
+                <div class='col-sm-6'>
+                    <canvas id="gr_androidVideoChart" width="400" height="400"></canvas>
+                </div>
+
+            </div>
+        </div>
+        <div id="django" class="container tab-pane fade"><br>
+            <h1>Current emotions recognized locally</h1>
+            <div class='row' url-endpoint='{% url "current_raw_data" %}'>
+
+                <div class='col-sm-6'>
+                    <canvas id="djangoAudioChart" width="400" height="400"></canvas>
+                </div>
+                <div class='col-sm-6'>
+                    <canvas id="djangoVideoChart" width="400" height="400"></canvas>
+                </div>
+
+            </div>
+        </div>
+        <div id="gr_django" class="container tab-pane fade"><br>
+            <h1>Current grouped emotions recognized locally</h1>
+            <div class='row' url-endpoint='{% url "current_gr_raw_data" %}'>
+
+                <div class='col-sm-6'>
+                    <canvas id="gr_djangoAudioChart" width="400" height="400"></canvas>
+                </div>
+                <div class='col-sm-6'>
+                    <canvas id="gr_djangoVideoChart" width="400" height="400"></canvas>
+                </div>
+
+            </div>
+        </div>
+
     </div>
 
 {% endblock content %}
