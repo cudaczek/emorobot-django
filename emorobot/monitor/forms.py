@@ -2,15 +2,27 @@
 
 from django import forms
 
-MODE_CHOICES = [('results_mode', 'Only results mode'),
-                ('recorded_data_mode', 'Only recorded data mode'),
-                ('full_mode', 'Results and data mode')]
+MODE_CHOICES = [('results_mode', 'Only recognized emotions'),
+                ('raw_data_mode', 'Only raw data'),
+                ('full_mode', 'Both recognized emotions and raw data')]
 
 
 class RecognitionConfigForm(forms.Form):
     """ form to set recording parameters """
-    mode = forms.ChoiceField(choices=MODE_CHOICES, initial='results_mode', widget=forms.RadioSelect)
-    frequency = forms.IntegerField(min_value=5, help_text="in seconds")
+    send_updates = forms.ChoiceField(required=False, 
+                                                                     label="Turn sending all updates on or off:", 
+                                                                     choices=[('on','on'),('off','off')], 
+                                                                     widget=forms.RadioSelect, 
+                                                                     initial='on')
+    mode = forms.ChoiceField(required=False, 
+                                                      choices=MODE_CHOICES, 
+                                                      initial='results_mode', 
+                                                      widget=forms.RadioSelect, 
+                                                      label="Choose which data will be sent in updates:")
+    frequency = forms.FloatField(required=False, 
+                                                           min_value=0.1, 
+                                                           help_text="seconds",
+                                                           label="Update frequency:")
 
 
 class SavingConfigForm(forms.Form):

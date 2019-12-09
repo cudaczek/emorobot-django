@@ -3,9 +3,11 @@ from django.contrib.auth import get_user_model
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.views.generic import TemplateView, FormView
+from django.apps import apps
 
 from .data_saver import DataType
 from .forms import RecognitionConfigForm, SavingConfigForm
+from .msq_config_sender import UpdateType
 
 User = get_user_model()
 
@@ -36,21 +38,34 @@ class ControlPanelView(TemplateView):
         return self.render_to_response(context)
 
 
+def is_field_empty(field):
+    return field is None or field == ""
+
 class ConfigFormView(FormView):
     form_class = RecognitionConfigForm
     template_name = 'control_panel.html'
     success_url = '/'
 
     def post(self, request, *args, **kwargs):
+        config_sender = apps.get_app_config('monitor').config_sender
+        config = {}
         question_form = self.form_class(request.POST)
-        answer_form = RecognitionConfigForm()
-        if question_form.is_valid():
-            question_form.save()
-            return self.render_to_response(self.get_context_data(sucess=True))
-        else:
-            return self.render_to_response(
-                self.get_context_data(question_form=question_form, answer_form=answer_form)
-            )
+        if not is_field_empty(question_form.data['send_updates']):
+            config['update_cycle_on'] = question_form.data['send_updates']=='on' 
+        if not is_field_empty(question_form.data['mode']):
+            mode = question_form.data['mode']
+            config['update_type'] = UpdateType.ALL if mode == "full_mode" else (
+                UpdateType.EMOTIONS_ONLY if mode=="results_mode" else UpdateType.RAW_ONLY)
+        if not is_field_empty(question_form.data['frequency']):
+            config['tick_length'] = int(round(float(question_form.data['frequency'])*1000))
+        config_sender.send_config(**config)
+        config_form = RecognitionConfigForm(self.request.GET or None)
+        saving_form = SavingConfigForm(self.request.GET or None)
+        context = self.get_context_data(**kwargs)
+        context['config_form'] = config_form
+        context['saving_form'] = saving_form
+        return render(request, self.template_name, context)
+        
 
 
 class SavingFormView(FormView):
