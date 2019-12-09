@@ -78,5 +78,5 @@ def get_final_predictions(results):
 
 def get_emotions_without_timestamp(emotion_dict):
     if "timestamp" in emotion_dict:
-        del emotion_dict["at"]
+        del emotion_dict["timestamp"]
     return emotion_dict.values(), emotion_dict.keys()
