@@ -1,5 +1,5 @@
 {
-  "names": [
+  "EMOTIONS": [
     "female_angry",
     "female_calm",
     "female_fearful",
@@ -12,11 +12,10 @@
     "male_sad"
   ],
   "AUDIO_MODEL_WEIGHTS": "Emotion_Voice_Detection_Model_weights.h5",
-  "AUDIO_MODEL": "Emotion_Voice_Detection_Model_model.json",
+  "MODEL_FILE": "Emotion_Voice_Detection_Model_model.json",
   "NN_NAME": "Speech-Emotion-Analyzer",
   "source": "https://github.com/MITESHPUTHRANNEU/Speech-Emotion-Analyzer",
   "SAMPLE_RATE": 44100,
   "RECORDING_LENGTH": 44100,
-  "INPUT_BUFFER_SIZE": 216,
-  "OUTPUT_BUFFER_SIZE": 10
+  "INPUT_BUFFER_SIZE": 216
 }
