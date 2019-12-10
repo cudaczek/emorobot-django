@@ -6,8 +6,8 @@ from enum import Enum
 
 import numpy as np
 import pandas as pd
-from PIL import Image
 import soundfile as sf
+from PIL import Image
 from dataclasses import dataclass
 
 from .predictors.predictor import Predictor
@@ -62,7 +62,7 @@ class DataSaver:
             data.data_frame = data.data_frame.drop(data.data_frame.index[0])
         if data.grouped_data_frame.shape[0] > self.MAX_NUMBER_OF_ROW:
             data.grouped_data_frame = data.grouped_data_frame.drop(data.grouped_data_frame.index[0])
-        if not self.save_data:
+        if not self.save_data or "no_face" in emotions:
             return
         self.save_emotions_to_file(emotions, data)
 
