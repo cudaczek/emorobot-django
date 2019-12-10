@@ -31,9 +31,14 @@ class ControlPanelView(TemplateView):
     template_name = 'control_panel.html'
 
     def get(self, request, *args, **kwargs):
+        data_saver = apps.get_app_config('monitor').data_saver
+        if data_saver.directory_path is not None:
+            saving_form = SavingConfigForm(self.request.GET or None, initial={'file_name': data_saver.directory_path})
+        else:
+            saving_form = SavingConfigForm(self.request.GET or None)
         config_form = RecognitionConfigForm(self.request.GET or None)
-        saving_form = SavingConfigForm(self.request.GET or None)
         context = self.get_context_data(**kwargs)
+        context["is_saving"] = data_saver.save_data
         context['config_form'] = config_form
         context['saving_form'] = saving_form
         return self.render_to_response(context)
@@ -86,6 +91,7 @@ class SavingFormView(FormView):
         config_form = RecognitionConfigForm(self.request.GET or None)
         saving_form = SavingConfigForm(self.request.GET or None, initial={'file_name': file_name})
         context = self.get_context_data(**kwargs)
+        context["is_saving"] = data_saver.save_data
         context['config_form'] = config_form
         context['saving_form'] = saving_form
         return render(request, self.template_name, context)
