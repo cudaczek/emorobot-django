@@ -26,6 +26,9 @@ class AudioRawDataPredictor(Predictor):
             audio_labels = self.neural_net.names
         return audio_predictions, audio_labels
 
+    def get_name(self):
+        return self.neural_net.name
+
 
 class AudioNeuralNetEvaluator:
 
@@ -46,6 +49,7 @@ class AudioNeuralNetEvaluator:
                 self.grouped_emotions = model_infos["GROUPED_EMOTIONS"]
             else:
                 self.grouped_emotions = self.load_global_emotions()
+            self.name = model_infos["NN_NAME"]
         json_file = open('resources/' + model_path, 'r')
         loaded_model_json = json_file.read()
         json_file.close()

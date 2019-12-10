@@ -16,11 +16,11 @@ class MessageReceiver:
             self.client.connect(config["BROKER_IP_OR_NAME"], int(config["BROKER_PORT"]), 60)
             threading.Thread(target=lambda: self.client.loop_forever()).start()
             print("finished constructor")
-            self.emotion_data = {"Speech-Emotion-Analyzer": {"a": 1.0}, "video": {"a": 1.0}}
-            self.raw_data = {"Speech-Emotion-Analyzer": b'', "video": b''}
-            self.types = {}
-            self.timestamp_raw = {"Speech-Emotion-Analyzer": "", "video": ""}
-            self.timestamp_emo = {"Speech-Emotion-Analyzer": "", "video": ""}
+            self.emotion_data = {"audio": {"a": 1.0}, "video": {"a": 1.0}}
+            self.raw_data = {"audio": b'', "video": b''}
+            self.timestamp_raw = {"audio": "", "video": ""}
+            self.timestamp_emo = {"audio": "", "video": ""}
+            self.names = {"video": "", "audio": ""}
         self.data_sever = data_saver
 
     def connect_callback(self, topic, rc):
@@ -31,16 +31,19 @@ class MessageReceiver:
         message = json.loads(msg.payload)
         # print(message)
         # print("got_message")
+        type = message["type"]
         name = message["network"]
-        self.types[name] = message["type"]
+        if name != self.names[type]:
+            self.names[type] = name
+            self.data_sever.update_nn_name(name, type)
         if "emotion_data" in message:
-            self.timestamp_emo[name] = message["timestamp"]
-            self.emotion_data[name] = message["emotion_data"]
-            self.data_sever.save_emotions(self.types[name], self.emotion_data[name], message["timestamp"])
+            self.timestamp_emo[type] = message["timestamp"]
+            self.emotion_data[type] = message["emotion_data"]
+            self.data_sever.save_emotions(type, self.emotion_data[type], message["timestamp"])
             # print(self.emotion_data[name])k
         if "raw_data" in message:
-            self.timestamp_raw[name] = message["timestamp"]
+            self.timestamp_raw[type] = message["timestamp"]
             import base64
-            self.raw_data[name] = base64.b64decode(message["raw_data"])
-            self.data_sever.save_raw_data(self.types[name], self.raw_data[name], message["timestamp"])
+            self.raw_data[type] = base64.b64decode(message["raw_data"])
+            self.data_sever.save_raw_data(type, self.raw_data[type], message["timestamp"])
             # print(self.raw_data[name])

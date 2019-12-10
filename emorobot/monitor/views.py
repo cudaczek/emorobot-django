@@ -159,26 +159,34 @@ def get_grouped_current_data_from_raw_data(request, *args, **kwargs):
 
 
 def get_preview_stats_from_emotions(request, *args, **kwargs):
-    return json_for_preview_stats(DataType.EMOTIONS)
+    data_saver = apps.get_app_config('monitor').data_saver
+    return json_for_preview_stats(DataType.EMOTIONS, data_saver, data_saver.audio.robot_NN_name,
+                                  data_saver.video.robot_NN_name)
 
 
 def get_preview_stats_from_raw_data(request, *args, **kwargs):
-    return json_for_preview_stats(DataType.EMOTIONS_FROM_RAW_DATA)
+    data_saver = apps.get_app_config('monitor').data_saver
+    return json_for_preview_stats(DataType.EMOTIONS_FROM_RAW_DATA, data_saver, data_saver.audio.robot_NN_name,
+                                  data_saver.video.robot_NN_name)
 
 
 def get_grouped_preview_stats_from_emotions(request, *args, **kwargs):
-    return json_for_preview_stats(DataType.EMOTIONS_GROUPED)
+    data_saver = apps.get_app_config('monitor').data_saver
+    return json_for_preview_stats(DataType.EMOTIONS_GROUPED, data_saver, data_saver.audio.local_NN_name,
+                                  data_saver.video.local_NN_name)
 
 
 def get_grouped_preview_stats_from_raw_data(request, *args, **kwargs):
-    return json_for_preview_stats(DataType.EMOTIONS_FROM_RAW_DATA_GROUPED)
-
-
-def json_for_preview_stats(data_type):
     data_saver = apps.get_app_config('monitor').data_saver
+    return json_for_preview_stats(DataType.EMOTIONS_FROM_RAW_DATA_GROUPED, data_saver, data_saver.audio.local_NN_name,
+                                  data_saver.video.local_NN_name)
+
+
+def json_for_preview_stats(data_type, data_saver, audio_name, video_name):
     return JsonResponse({
-        "labels": get_unique_labels(data_saver.get_video_labels(data_type),
-                                    data_saver.get_audio_labels(data_type)),
+        "audio_name": audio_name,
+        "video_name": video_name,
+        "labels": get_unique_labels(data_saver.get_video_labels(data_type), data_saver.get_audio_labels(data_type)),
         "video_data": data_saver.get_video_data(data_type),
         "audio_data": data_saver.get_audio_data(data_type)
     })  # http response
