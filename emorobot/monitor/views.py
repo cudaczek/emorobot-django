@@ -94,68 +94,33 @@ class SavingFormView(FormView):
 # Data getters #
 
 def get_current_data_from_emotions(request, *args, **kwargs):
-    audio_name = "Speech-Emotion-Analyzer"
+    audio_name = "audio"
     video_name = "video"
     data_type = DataType.EMOTIONS
-    result = get_predictions_and_labels(audio_name, video_name, data_type)
-    return JsonResponse({"audio_name": audio_name,
-                         "video_name": video_name,
-                         "audio_timestamp": result["audio_timestamp"],
-                         "video_timestamp": result["video_timestamp"],
-                         "audio_recognizer_labels": list(result["audio_labels"]),
-                         "audio_recognizer_data": list(result["audio_predictions"]),
-                         "video_recognizer_labels": list(result["video_labels"]),
-                         "video_recognizer_data": list(result["video_predictions"]),
-                         })  # http response
+    return get_predictions_and_labels(audio_name, video_name, data_type)
 
 
 def get_grouped_current_data_from_emotions(request, *args, **kwargs):
-    audio_name = "Speech-Emotion-Analyzer"
-    video_name = "video"
+    audio_type = "audio"
+    video_type = "video"
     data_type = DataType.EMOTIONS_GROUPED
-    result = get_predictions_and_labels(audio_name, video_name, data_type)
-    return JsonResponse({"audio_name": audio_name,
-                         "video_name": video_name,
-                         "audio_timestamp": result["audio_timestamp"],
-                         "video_timestamp": result["video_timestamp"],
-                         "audio_recognizer_labels": list(result["audio_labels"]),
-                         "audio_recognizer_data": list(result["audio_predictions"]),
-                         "video_recognizer_labels": list(result["video_labels"]),
-                         "video_recognizer_data": list(result["video_predictions"]),
-                         })  # http response
+    return  get_predictions_and_labels(audio_type, video_type, data_type)
+
 
 
 def get_current_data_from_raw_data(request, *args, **kwargs):
-    audio_name = "Speech-Emotion-Analyzer"
-    video_name = "video"
+    audio_type = "audio"
+    video_type = "video"
     data_type = DataType.EMOTIONS_FROM_RAW_DATA
-    result = get_predictions_and_labels(audio_name, video_name, data_type)
-    return JsonResponse({"audio_name": audio_name,
-                         "video_name": video_name,
-                         "audio_timestamp": result["audio_timestamp"],
-                         "video_timestamp": result["video_timestamp"],
-                         "audio_recognizer_labels": list(result["audio_labels"]),
-                         "audio_recognizer_data": list(result["audio_predictions"]),
-                         "video_recognizer_labels": list(result["video_labels"]),
-                         "video_recognizer_data": list(result["video_predictions"]),
-                         })  # http response
+    return get_predictions_and_labels(audio_type, video_type, data_type)
+
 
 
 def get_grouped_current_data_from_raw_data(request, *args, **kwargs):
-    receiver = apps.get_app_config('monitor').receiver
-    audio_name = "Speech-Emotion-Analyzer"
-    video_name = "video"
+    audio_type = "audio"
+    video_type = "video"
     data_type = DataType.EMOTIONS_FROM_RAW_DATA_GROUPED
-    result = get_predictions_and_labels(audio_name, video_name, data_type)
-    return JsonResponse({"audio_name": audio_name,
-                         "video_name": video_name,
-                         "audio_timestamp": result["audio_timestamp"],
-                         "video_timestamp": result["video_timestamp"],
-                         "audio_recognizer_labels": list(result["audio_labels"]),
-                         "audio_recognizer_data": list(result["audio_predictions"]),
-                         "video_recognizer_labels": list(result["video_labels"]),
-                         "video_recognizer_data": list(result["video_predictions"]),
-                         })  # http response
+    return get_predictions_and_labels(audio_type, video_type, data_type)
 
 
 def get_preview_stats_from_emotions(request, *args, **kwargs):
