@@ -25,14 +25,15 @@
 
         </form>
         <br/>
-        <h1>Saving data configurations</h1>
+        <h1>Saving data configuration</h1>
+        <p>
         {% if is_saving %}
-            Data is currently being saved, if you want to stop saving click stop button.
+            Data is currently being saved, if you want to stop saving click "stop".
         {% else %}
-            If you want to start saving incoming data, type path to existing directory in which you want to store data
-            and click start.
+            If you want to start saving incoming data, type a path to existing directory in which you want to store data
+            and click "start".
         {% endif %}
-        <br>
+        </p>
         <form action="{% url 'saving' %}" method="POST">
             {% csrf_token %}
             <input type="hidden" name="next" value="{{ next }}">
