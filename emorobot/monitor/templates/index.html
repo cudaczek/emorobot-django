@@ -13,8 +13,18 @@
 
 <div class='row'>
     <div>
-        <h1>Hello World</h1>
-        <h2>Nice to see you</h2>
+        <br/>
+        <h1>Emotion detection system</h1>
+        <p>Welcome to the emotion detection system. What do you want to do?</p>
+        <ul>
+            <li>To see the newest emotion data, go to the <a href="{% url 'current_stats' %}">current</a> section.</li>
+            <li>To see how emotion data changed in time, go to the <a href="{% url 'preview' %}">preview</a>.</li>
+            <li>To change settings of the remote application or start/stop saving incoming data, go to the <a href="{% url 'control_panel' %}">control panel</a>.</li>
+        </ul>
+        <h2>What do those categories for graphs mean?</h2>
+        <p>Emotions can be predicted both remotely and locally, possibly with different results and different delays. Additionally, for easier interpretation, several emotions can be grouped together - so, for example, instead of seeing probability scores separately for "sadness" and "disgust" we might see them together under "negative emotions". </p>
+        <p>Therefore, the "local/robot" divide shares the results on those calculated locally and remotely. "Grouped" graphs have emotions grouped in accord with configuration files.</p>
+        <p>The graphs won't be current all the time - "local" graphs will be updated only when the raw data arrives, "robot" graphs when emotion data arrives. To make sure that the remote application is sending the desired kind of data, choose the appropriate mode in <a href="{% url 'control_panel' %}">control panel</a> and send the settings. Remember that calculating emotion data remotely may lower the frequency of incoming updates.</p>
     </div>
 </div>
 
