@@ -50,8 +50,8 @@ class DataSaver:
             data = self.video
         else:
             data = self.audio
-
-        data.data_frame = data.data_frame.append(self.get_emotions_with_timestamp(emotions, timestamp),
+        emotions_with_timestamp = self.get_emotions_with_timestamp(emotions, timestamp)
+        data.data_frame = data.data_frame.append(emotions_with_timestamp,
                                                  ignore_index=True)
         data.grouped_data_frame = data.grouped_data_frame.append(
             self.get_grouped_emotions_with_timestamp(data.predictor, emotions, timestamp), ignore_index=True)
@@ -59,9 +59,9 @@ class DataSaver:
             data.data_frame = data.data_frame.drop(data.data_frame.index[0])
         if data.grouped_data_frame.shape[0] > self.MAX_NUMBER_OF_ROW:
             data.grouped_data_frame = data.grouped_data_frame.drop(data.grouped_data_frame.index[0])
-        if not self.save_data:
+        if not self.save_data or "no_face" in emotions_with_timestamp:
             return
-        self.save_emotions_to_file(emotions, data)
+        self.save_emotions_to_file(emotions_with_timestamp, data)
 
     def get_emotions_with_timestamp(self, emotions_dict, timestamp):
         result = emotions_dict.copy()
