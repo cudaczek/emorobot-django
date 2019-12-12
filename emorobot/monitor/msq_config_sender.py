@@ -3,16 +3,19 @@ import threading
 import json
 from enum import Enum
 
+
 class UpdateType(Enum):
     EMOTIONS_ONLY = 0
     RAW_ONLY = 1
     ALL = 2
+
 
 class EnumEncoder(json.JSONEncoder):
     def default(self, obj):
         if type(obj) is UpdateType:
             return str(obj.value)
         return json.JSONEncoder.default(self, obj)
+
 
 class ConfigSender:
     def __init__(self):
@@ -26,10 +29,9 @@ class ConfigSender:
         except Exception as es:
             print("init ", str(es))
 
-    def send_config(self,
-                                  update_type: UpdateType=None, 
-                                  update_cycle_on: bool=None, 
-                                  tick_length: int=None):
+    def send_config(self, update_type: UpdateType = None,
+                    update_cycle_on: bool = None,
+                    tick_length: int = None):
         try:
             config = {}
             if update_cycle_on is not None:
@@ -40,6 +42,6 @@ class ConfigSender:
                 config['TICK_LENGTH'] = tick_length
             self.client.publish(self.config_topic, json.dumps(config, cls=EnumEncoder), qos=2)
             print("sent config message " + json.dumps(config, cls=EnumEncoder))
-            print("topic: "+self.config_topic)
+            print("topic: " + self.config_topic)
         except Exception as es:
             print("send_config error ", str(es))

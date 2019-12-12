@@ -64,10 +64,16 @@ class ConfigFormView(FormView):
                 UpdateType.EMOTIONS_ONLY if mode=="results_mode" else UpdateType.RAW_ONLY)
         if not is_field_empty(question_form.data['frequency']):
             config['tick_length'] = int(round(float(question_form.data['frequency'])*1000))
+
         config_sender.send_config(**config)
         config_form = RecognitionConfigForm(self.request.GET or None)
-        saving_form = SavingConfigForm(self.request.GET or None)
+        data_saver = apps.get_app_config('monitor').data_saver
+        if data_saver.directory_path is not None:
+            saving_form = SavingConfigForm(self.request.GET or None, initial={'file_name': data_saver.directory_path})
+        else:
+            saving_form = SavingConfigForm(self.request.GET or None)
         context = self.get_context_data(**kwargs)
+        context["is_saving"] = data_saver.save_data
         context['config_form'] = config_form
         context['saving_form'] = saving_form
         return render(request, self.template_name, context)
