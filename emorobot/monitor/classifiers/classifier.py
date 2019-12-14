@@ -1,7 +1,7 @@
 from abc import ABC
 
 
-class Predictor(ABC):
+class Classifier(ABC):
     def __init__(self):
         self.neural_net = None
 

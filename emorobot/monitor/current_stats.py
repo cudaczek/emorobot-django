@@ -8,8 +8,8 @@ def get_predictions_and_labels(audio_type, video_type, data_type):
     receiver = apps.get_app_config('monitor').receiver
     audio_recognizer = receiver.emotion_data[audio_type]
     video_recognizer = receiver.emotion_data[video_type]
-    audio_predictor = apps.get_app_config('monitor').audio_predictor
-    video_predictor = apps.get_app_config('monitor').video_predictor
+    audio_predictor = apps.get_app_config('monitor').audio_classifier
+    video_predictor = apps.get_app_config('monitor').video_classifier
     if data_type == DataType.EMOTIONS:
         results = (get_received_emotions_from_robot(audio_recognizer, video_recognizer), receiver.names[audio_type],
                    receiver.names[video_type])

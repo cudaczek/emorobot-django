@@ -10,7 +10,7 @@ import soundfile as sf
 from PIL import Image
 from dataclasses import dataclass
 
-from .predictors.predictor import Predictor
+from .classifiers.classifier import Classifier
 
 
 class DataType(Enum):
@@ -25,7 +25,7 @@ class EmotionData:
     file_name: str
     local_NN_name: str
     robot_NN_name: str
-    predictor: Predictor
+    predictor: Classifier
     data_frame: pd.DataFrame = pd.DataFrame()
     grouped_data_frame: pd.DataFrame = pd.DataFrame()
     raw_data_data_frame: pd.DataFrame = pd.DataFrame()
@@ -36,7 +36,7 @@ class DataSaver:
     def __init__(self, video_nn, audio_nn):
         self.save_data = False
         self.directory_path = None
-        self.video = EmotionData("video_emotion_data.csv", video_nn.get_name(), "", video_nn, )
+        self.video = EmotionData("video_emotion_data.csv", video_nn.get_name(), "", video_nn,)
         self.audio = EmotionData("audio_emotion_data.csv", audio_nn.get_name(), "", audio_nn)
         self.MAX_NUMBER_OF_ROW = 20
 

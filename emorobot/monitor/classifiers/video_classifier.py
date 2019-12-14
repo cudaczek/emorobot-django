@@ -5,10 +5,10 @@ import numpy as np
 import tensorflow as tf
 from keras.models import load_model
 
-from .predictor import Predictor
+from .classifier import Classifier
 
 
-class VideoRawDataPredictor(Predictor):
+class VideoRawDataClassifier(Classifier):
     def __init__(self, filename):
         self.neural_net = VideoNeuralNetEvaluator(file_name=filename)
 

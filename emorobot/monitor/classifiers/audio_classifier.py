@@ -8,10 +8,10 @@ import pandas as pd
 import tensorflow as tf
 from keras.models import model_from_json
 
-from .predictor import Predictor
+from .classifier import Classifier
 
 
-class AudioRawDataPredictor(Predictor):
+class AudioRawDataClassifier(Classifier):
     def __init__(self, filename):
         self.neural_net = AudioNeuralNetEvaluator(file_name=filename, sample_rate=44100)
 

@@ -51,6 +51,7 @@ class ControlPanelView(TemplateView):
 def is_field_empty(field):
     return field is None or field == ""
 
+
 class ConfigFormView(FormView):
     form_class = RecognitionConfigForm
     template_name = 'control_panel.html'
@@ -61,7 +62,7 @@ class ConfigFormView(FormView):
         config = {}
         question_form = self.form_class(request.POST)
         if not is_field_empty(question_form.data['send_updates']):
-            config['update_cycle_on'] = question_form.data['send_updates']=='on' 
+            config['update_cycle_on'] = question_form.data['send_updates'] == 'on'
         if not is_field_empty(question_form.data['mode']):
             mode = question_form.data['mode']
             config['update_type'] = UpdateType.ALL if mode == "full_mode" else (
@@ -129,7 +130,6 @@ def get_current_data_from_raw_data(request, *args, **kwargs):
     video_type = "video"
     data_type = DataType.EMOTIONS_FROM_RAW_DATA
     return get_predictions_and_labels(audio_type, video_type, data_type)
-
 
 
 def get_grouped_current_data_from_raw_data(request, *args, **kwargs):
