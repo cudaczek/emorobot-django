@@ -1,9 +1,12 @@
 import io
 import os
+import struct
 from datetime import datetime
 from enum import Enum
 
+import numpy as np
 import pandas as pd
+import soundfile as sf
 from PIL import Image
 from dataclasses import dataclass
 
@@ -50,8 +53,8 @@ class DataSaver:
             data = self.video
         else:
             data = self.audio
-
-        data.data_frame = data.data_frame.append(self.get_emotions_with_timestamp(emotions, timestamp),
+        emotions_with_timestamp = self.get_emotions_with_timestamp(emotions, timestamp)
+        data.data_frame = data.data_frame.append(emotions_with_timestamp,
                                                  ignore_index=True)
         data.grouped_data_frame = data.grouped_data_frame.append(
             self.get_grouped_emotions_with_timestamp(data.predictor, emotions, timestamp), ignore_index=True)
@@ -59,9 +62,9 @@ class DataSaver:
             data.data_frame = data.data_frame.drop(data.data_frame.index[0])
         if data.grouped_data_frame.shape[0] > self.MAX_NUMBER_OF_ROW:
             data.grouped_data_frame = data.grouped_data_frame.drop(data.grouped_data_frame.index[0])
-        if not self.save_data:
+        if not self.save_data or "no_face" in emotions_with_timestamp:
             return
-        self.save_emotions_to_file(emotions, data)
+        self.save_emotions_to_file(emotions_with_timestamp, data)
 
     def get_emotions_with_timestamp(self, emotions_dict, timestamp):
         result = emotions_dict.copy()
@@ -96,8 +99,12 @@ class DataSaver:
         image.save(file_path, "PNG")
 
     def save_audio(self, bytes):
-        # TODO
-        pass
+        if bytes != b'':
+            count = int(len(bytes) / 4)
+            floats = struct.unpack(">" + ('f' * count), bytes)
+            timestamp = datetime.timestamp(datetime.now())
+            file_path = os.path.join(self.directory_path, str(int(timestamp)) + ".wav")
+            sf.write(file_path, np.array(floats), 44100, 'PCM_16', endian="FILE")
 
     def get_video_labels(self, type):
         return self.get_labels(self.video, type)
@@ -152,7 +159,6 @@ class DataSaver:
                     biggest_val = value
                     y = key
             data_list.append({"x": x, "y": y})
-
         data_list.sort(key=lambda x: x["x"])
         return data_list
 

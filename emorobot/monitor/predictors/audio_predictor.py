@@ -42,9 +42,9 @@ class AudioNeuralNetEvaluator:
         self.names = []
         with open('resources/' + self.file_name + '_info.json') as json_file:
             model_infos = json.load(json_file)
-            model_path = model_infos["AUDIO_MODEL"]
+            model_path = model_infos["MODEL_FILE"]
             model_weights = model_infos["AUDIO_MODEL_WEIGHTS"]
-            self.names = model_infos["names"]
+            self.names = model_infos["EMOTIONS"]
             if "GROUPED_EMOTIONS" in model_infos.keys():
                 self.grouped_emotions = model_infos["GROUPED_EMOTIONS"]
             else:

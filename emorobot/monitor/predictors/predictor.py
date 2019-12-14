@@ -22,12 +22,15 @@ class Predictor(ABC):
         for group_name in groups_names:
             grouped_emotions.update({group_name: 0.0})
         grouped_emotions.update({"other": 0.0})
-        for pred, label in zip(predictions, labels):
-            added = False
-            for group_name in groups_names:
-                if label in groups[group_name]:
-                    grouped_emotions[group_name] += pred
-                    added = True
-            if not added:
-                grouped_emotions["other"] += pred
-        return grouped_emotions.values(), grouped_emotions.keys()
+        if predictions is not None and labels is not None:
+            for pred, label in zip(predictions, labels):
+                added = False
+                for group_name in groups_names:
+                    if label in groups[group_name]:
+                        grouped_emotions[group_name] += pred
+                        added = True
+                if not added:
+                    grouped_emotions["other"] += pred
+            return grouped_emotions.values(), grouped_emotions.keys()
+        else:
+            return [], []
