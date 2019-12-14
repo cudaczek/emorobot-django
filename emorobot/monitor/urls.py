@@ -14,6 +14,7 @@ urlpatterns = [
     path('preview/api/data/gr_django', views.get_grouped_preview_stats_from_raw_data, name='preview_gr_raw_data'),
     path('current/', views.current_stats, name='current_stats'),
     path('preview/', views.preview_stats, name='preview'),
+    path('about/', views.about, name='about'),
     path('control/', ControlPanelView.as_view(), name='control_panel'),
     path('config/submit', ConfigFormView.as_view(), name='config'),
     path('saving/submit', SavingFormView.as_view(), name='saving'),

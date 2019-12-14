@@ -25,6 +25,10 @@ def current_stats(request):
     return render(request, "current_stats.html")
 
 
+def about(request):
+    return render(request, "about.html")
+
+
 # Control Panel #
 
 class ControlPanelView(TemplateView):

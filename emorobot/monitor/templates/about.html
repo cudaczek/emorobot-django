@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block navbar %}
+    <ul class="navbar-nav">
+        <li class="nav-item"><a class="nav-link" href="{% url 'index' %}">Home</a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'current_stats' %}">Current</a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'preview' %}">Preview</a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'control_panel' %}">Control Panel</a></li>
+        <li class="nav-item active"><a class="nav-link" href="{% url 'about' %}">About</a></li>
+    </ul>
+{% endblock navbar %}
+
+{% block content %}
+
+    <div class="jumbotron">
+        <h3> About the project </h3>
+
+        <p>Pepper's emotion detection system was created for an engineering thesis project by Magdalena Cudak,
+            Aleksandra Drewnik and Julia Dutkiewicz,
+            students of AGH University of Science and Technology, Faculty of Computer Science, Electronics and
+            Telecommunications.
+            The project's supervisor was dr hab. inż. Bartłomiej Śnieżyński.
+        </p>
+
+        <p></p>
+
+    </div>
+
+
+{% endblock content %}
