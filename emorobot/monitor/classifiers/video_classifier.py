@@ -12,20 +12,20 @@ class VideoRawDataClassifier(Classifier):
     def __init__(self, filename):
         self.neural_net = VideoNeuralNetEvaluator(file_name=filename)
 
-    def predict(self, raw_data):
-        video_predictions = None
+    def classify(self, raw_data):
+        video_results = None
         video_labels = None
         if raw_data != b'':
             image_as_np = np.fromstring(raw_data, np.uint8)
             image = cv2.imdecode(image_as_np, cv2.IMREAD_COLOR)
             image = self.neural_net.preprocess(image)
             if image is None:
-                video_predictions = [1.0]
+                video_results = [1.0]
                 video_labels = ["no_face"]
-                return video_predictions, video_labels
-            video_predictions = self.neural_net.predict(image)
+                return video_results, video_labels
+            video_results = self.neural_net.clasify(image)
             video_labels = self.neural_net.names
-        return video_predictions, video_labels
+        return video_results, video_labels
 
     def get_name(self):
         return self.neural_net.name
@@ -65,10 +65,10 @@ class VideoNeuralNetEvaluator:
             file_path = 'resources/' + model_infos["FACE_CLASSIFIER"]
         return cv2.CascadeClassifier(file_path)
 
-    def predict(self, data):
+    def clasify(self, data):
         with self.graph.as_default():
-            predictions = self.model.predict(data)[0]
-        return predictions
+            results = self.model.predict(data)[0]
+        return results
 
     def preprocess(self, image):
         gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)

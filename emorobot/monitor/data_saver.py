@@ -25,7 +25,7 @@ class EmotionData:
     file_name: str
     local_NN_name: str
     robot_NN_name: str
-    predictor: Classifier
+    classifier: Classifier
     data_frame: pd.DataFrame = pd.DataFrame()
     grouped_data_frame: pd.DataFrame = pd.DataFrame()
     raw_data_data_frame: pd.DataFrame = pd.DataFrame()
@@ -57,7 +57,7 @@ class DataSaver:
         data.data_frame = data.data_frame.append(emotions_with_timestamp,
                                                  ignore_index=True)
         data.grouped_data_frame = data.grouped_data_frame.append(
-            self.get_grouped_emotions_with_timestamp(data.predictor, emotions, timestamp), ignore_index=True)
+            self.get_grouped_emotions_with_timestamp(data.classifier, emotions, timestamp), ignore_index=True)
         if data.data_frame.shape[0] > self.MAX_NUMBER_OF_ROW:
             data.data_frame = data.data_frame.drop(data.data_frame.index[0])
         if data.grouped_data_frame.shape[0] > self.MAX_NUMBER_OF_ROW:
@@ -71,9 +71,9 @@ class DataSaver:
         result.update({"timestamp": timestamp})
         return result
 
-    def get_grouped_emotions_with_timestamp(self, predictor, emotions, timestamp):
-        grouped_predictions, grouped_labels = predictor.group(list(emotions.values()), list(emotions.keys()))
-        grouped_emotions = self.get_emotion_dictionary(grouped_labels, grouped_predictions)
+    def get_grouped_emotions_with_timestamp(self, classifier, emotions, timestamp):
+        grouped_results, grouped_labels = classifier.group(list(emotions.values()), list(emotions.keys()))
+        grouped_emotions = self.get_emotion_dictionary(grouped_labels, grouped_results)
         grouped_emotions["timestamp"] = timestamp
         return grouped_emotions
 
@@ -167,7 +167,7 @@ class DataSaver:
             data = self.video
         else:
             data = self.audio
-        emotions, grouped_emotions = self.predict_emotions(data.predictor, bytes, timestamp)
+        emotions, grouped_emotions = self.classify_emotions(data.classifier, bytes, timestamp)
         data.raw_data_data_frame = data.raw_data_data_frame.append(emotions, ignore_index=True)
         if data.raw_data_data_frame.shape[0] > self.MAX_NUMBER_OF_ROW:
             data.raw_data_data_frame = data.raw_data_data_frame.drop(data.raw_data_data_frame.index[0])
@@ -176,18 +176,18 @@ class DataSaver:
             data.grouped_raw_data_data_frame = data.grouped_raw_data_data_frame.drop(
                 data.grouped_raw_data_data_frame.index[0])
 
-    def predict_emotions(self, predictor, bytes, timestamp):
-        predictions, labels = predictor.predict(bytes)
-        emotions = self.get_emotion_dictionary(labels, predictions)
+    def classify_emotions(self, classifier, bytes, timestamp):
+        results, labels = classifier.classify(bytes)
+        emotions = self.get_emotion_dictionary(labels, results)
         emotions["timestamp"] = timestamp
-        grouped_predictions, grouped_labels = predictor.group(predictions, labels)
-        grouped_emotions = self.get_emotion_dictionary(grouped_labels, grouped_predictions)
+        grouped_results, grouped_labels = classifier.group(results, labels)
+        grouped_emotions = self.get_emotion_dictionary(grouped_labels, grouped_results)
         grouped_emotions["timestamp"] = timestamp
         return emotions, grouped_emotions
 
-    def get_emotion_dictionary(self, labels, predictions):
+    def get_emotion_dictionary(self, labels, results):
         result = {}
-        for l, e in zip(labels, predictions):
+        for l, e in zip(labels, results):
             result[l] = e
         return result
 

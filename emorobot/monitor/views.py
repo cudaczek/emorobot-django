@@ -5,7 +5,7 @@ from django.shortcuts import render
 from django.views.generic import TemplateView, FormView
 from django.apps import apps
 
-from .current_stats import get_predictions_and_labels
+from .current_stats import get_results_and_labels
 from .data_saver import DataType
 from .forms import RecognitionConfigForm, SavingConfigForm
 from .msq_config_sender import UpdateType
@@ -114,14 +114,14 @@ def get_current_data_from_emotions(request, *args, **kwargs):
     audio_name = "audio"
     video_name = "video"
     data_type = DataType.EMOTIONS
-    return get_predictions_and_labels(audio_name, video_name, data_type)
+    return get_results_and_labels(audio_name, video_name, data_type)
 
 
 def get_grouped_current_data_from_emotions(request, *args, **kwargs):
     audio_type = "audio"
     video_type = "video"
     data_type = DataType.EMOTIONS_GROUPED
-    return  get_predictions_and_labels(audio_type, video_type, data_type)
+    return  get_results_and_labels(audio_type, video_type, data_type)
 
 
 
@@ -129,14 +129,14 @@ def get_current_data_from_raw_data(request, *args, **kwargs):
     audio_type = "audio"
     video_type = "video"
     data_type = DataType.EMOTIONS_FROM_RAW_DATA
-    return get_predictions_and_labels(audio_type, video_type, data_type)
+    return get_results_and_labels(audio_type, video_type, data_type)
 
 
 def get_grouped_current_data_from_raw_data(request, *args, **kwargs):
     audio_type = "audio"
     video_type = "video"
     data_type = DataType.EMOTIONS_FROM_RAW_DATA_GROUPED
-    return get_predictions_and_labels(audio_type, video_type, data_type)
+    return get_results_and_labels(audio_type, video_type, data_type)
 
 
 def get_preview_stats_from_emotions(request, *args, **kwargs):
