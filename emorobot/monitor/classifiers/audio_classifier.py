@@ -8,23 +8,23 @@ import pandas as pd
 import tensorflow as tf
 from keras.models import model_from_json
 
-from .predictor import Predictor
+from .classifier import Classifier
 
 
-class AudioRawDataPredictor(Predictor):
+class AudioRawDataClassifier(Classifier):
     def __init__(self, filename):
         self.neural_net = AudioNeuralNetEvaluator(file_name=filename, sample_rate=44100)
 
-    def predict(self, raw_data):
-        audio_predictions = None
+    def classify(self, raw_data):
+        audio_results = None
         audio_labels = None
         if raw_data != b'':
             count = int(len(raw_data) / 4)
             floats = struct.unpack(">" + ('f' * count), raw_data)
-            audio_predictions = self.neural_net.predict(np.array(floats))
-            audio_predictions = [pred.item() for pred in audio_predictions[0]]
+            audio_results = self.neural_net.classify(np.array(floats))
+            audio_results = [pred.item() for pred in audio_results[0]]
             audio_labels = self.neural_net.names
-        return audio_predictions, audio_labels
+        return audio_results, audio_labels
 
     def get_name(self):
         return self.neural_net.name
@@ -65,11 +65,11 @@ class AudioNeuralNetEvaluator:
             emotions = json.load(json_file)
         return emotions
 
-    def predict(self, data):
+    def classify(self, data):
         with self.graph.as_default():
             twodim = self.preprocess(data, self.sample_rate)
-            predictions = self.model.predict(twodim)
-        return predictions
+            results = self.model.predict(twodim)
+        return results
 
     def preprocess(self, data, sample_rate):
         sample_rate = np.array(sample_rate)
