@@ -7,3 +7,4 @@ librosa
 numpy
 keras==2.2.5
 dataclasses
+scikit-learn==0.21.3
