@@ -27,11 +27,9 @@ class MessageReceiver:
         self.client.subscribe(topic)
 
     def message_callback(self, msg):
-        print(msg.payload[:100])
+        # print(msg.payload[:100])
         import json
         message = json.loads(msg.payload)
-        # print(message)
-        # print("got_message")
         type = message["type"]
         name = message["network"]
         if name != self.names[type]:

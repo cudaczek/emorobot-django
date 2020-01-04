@@ -9,7 +9,7 @@
     "neutral"
   ],
   "NN_NAME": "Real time CNN for Emotion Classification",
-  "VIDEO_MODEL": "Emotion_Video_Detection_Model.hdf5",
+  "MODEL_FILE": "Emotion_Video_Detection_Model.hdf5",
   "FACE_CLASSIFIER" : "haarcascade_frontalface_default.xml",
   "GROUPED_EMOTIONS": {
     "positive": [
