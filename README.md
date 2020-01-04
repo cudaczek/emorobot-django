@@ -1,6 +1,6 @@
 # EmotionalRobotPepper
 
-This an implementation of batchelors thesis writen by Aleksandra Drewnik, Magdalena Cudak and Julia Dutkiewicz.
+This is an implementation of engineer thesis writen by Aleksandra Drewnik, Magdalena Cudak and Julia Dutkiewicz.
 
 The application is written in Python. It is ment to receive data from application running on Pepper Robot's tablet, and display it on charts in web interface. The source code to the application running on the robot is here (https://github.com/JuliaDutkiewicz/EmotionalRobot).
 
